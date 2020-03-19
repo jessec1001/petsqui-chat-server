@@ -1,0 +1,23 @@
+version: "3"
+services:
+  mariadb:
+    image: "mariadb:10.1.16"
+    expose:
+      - 3306
+    env_file: "./.env"
+    environment:
+      MYSQL_ROOT_PASSWORD: "${SEQUELIZE_PASSWORD}"
+      MYSQL_USER: "${SEQUELIZE_USERNAME}"
+      MYSQL_PASSWORD: "${SEQUELIZE_PASSWORD}"
+      MYSQL_DATABASE: "${SEQUELIZE_DATABASE}"
+
+  web:
+    build: .
+    depends_on:
+      - mariadb
+    ports:
+      - "0.0.0.0:3000:3000"
+      - "0.0.0.0:5858:5858"
+    env_file: "./.env"
+    environment:
+      SEQUELIZE_HOST: mariadb

@@ -1,0 +1,26 @@
+{
+    "name": "chat-backend",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node ./bin/www",
+        "debug": "nodemon --legacy-watch --watch ./src --inspect=0.0.0.0:5858 --nolazy ./src/index.js",
+        "watch": "nodemon --legacy-watch --watch ./src --nolazy ./src/index.js"
+    },
+    "dependencies": {
+        "bcrypt": "^4.0.1",
+        "cookie-parser": "~1.4.4",
+        "debug": "~2.6.9",
+        "dotenv": "^8.2.0",
+        "express": "~4.16.1",
+        "jsonwebtoken": "^8.5.1",
+        "morgan": "~1.9.1",
+        "mysql2": "^2.1.0",
+        "sequelize": "^5.21.5",
+        "socket.io": "^2.3.0",
+        "uuid": "^7.0.2"
+    },
+    "devDependencies": {
+        "eslint": "^6.8.0"
+    }
+}
