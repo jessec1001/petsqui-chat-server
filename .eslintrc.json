@@ -1,40 +1,57 @@
 {
     "env": {
-        "commonjs": true,
         "es6": true,
         "node": true
     },
-    "extends": "eslint:recommended",
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "ignorePatterns": ["node_modules/", "build/"],
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": 2018
+        "ecmaVersion": 2018,
+        "sourceType": "module"
     },
+    "plugins": [
+        "@typescript-eslint"
+    ],
     "rules": {
         "indent": [
             "error",
             2
         ],
-        "linebreak-style": [
-            "error",
-            "unix"
+        "no-extra-semi": "off",
+        "@typescript-eslint/no-extra-semi": [
+            "error"
         ],
-        "quotes": [
-            "error",
-            "double"
+        "semi": "off",
+        "@typescript-eslint/semi": [
+            "error"
         ],
-        "semi": [
+        "curly": [
             "error",
-            "always"
+            "multi-line"
         ],
-        "valid-jsdoc": [
+        "brace-style": [
+            "error",
+            "1tbs",
+            {
+                "allowSingleLine": true
+            }
+        ],
+        "space-before-function-paren": [
             "warn",
             {
-                "requireParamDescription": false,
-                "requireReturnDescription": false
+                "anonymous": "always",
+                "named": "never"
             }
-        ]
+        ],
+        "no-console": "warn"
     }
 }

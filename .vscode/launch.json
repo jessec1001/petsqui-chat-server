@@ -1,5 +1,5 @@
 {
-    // Use IntelliSense to learn about possible attributes.
+    // Use IntelliSense to learn about possible Node.js debug attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
@@ -7,24 +7,71 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "nodemon",
-            "runtimeExecutable": "nodemon",
-            "program": "${workspaceFolder}\\bin\\www",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/index.ts",
+            "outFiles": [
+                "${workspaceFolder}/build/**/*.js"
+            ],
+            "env": {
+                "NODE_ENV": "development"
+            }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch in Docker",
+            "preLaunchTask": "tsc-watch",
+            "protocol": "auto",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "docker-run"
+            ],
+            "port": 5858,
             "restart": true,
+            "timeout": 60000,
+            "localRoot": "${workspaceFolder}/build",
+            "remoteRoot": "/server/build",
+            "outFiles": [
+                "${workspaceFolder}/build/**/*.js"
+            ],
             "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach to Docker",
+            "preLaunchTask": "tsc-watch",
+            "protocol": "auto",
+            "port": 5858,
+            "restart": true,
+            "localRoot": "${workspaceFolder}/build",
+            "remoteRoot": "/server/build",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ],
             "skipFiles": [
-                "<node_internals>/**"
+                "<node_internals>/**/*.js",
             ]
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
+            "name": "Local Nodemon",
+            "protocol": "auto",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "local-debug"
             ],
-            "program": "${workspaceFolder}\\bin\\www"
+            "restart": true,
+            "port": 5858,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "outFiles": [
+                "${workspaceFolder}/dist/**/*.js"
+            ]
         }
     ]
 }
