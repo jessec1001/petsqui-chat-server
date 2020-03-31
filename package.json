@@ -38,7 +38,7 @@
         "deploy": "pm2 deploy ecosystem.config.js production setup",
         "dev-start": "ts-node src/index.ts",
         "tsc-watch": "tsc -w -p ./",
-        "watch": "nodemon --legacy-watch --watch ./build --nolazy ./build/index.js",
+        "watch": "pm2 start ./build/index.js --no-daemon",
         "debug": "nodemon --legacy-watch --watch ./build --inspect=0.0.0.0:5858 --nolazy ./build/index.js",
         "local-watch": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts",
         "local-debug": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --inspect=0.0.0.0:5858 --exec ts-node src/index.ts",
