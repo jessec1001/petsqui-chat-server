@@ -13,14 +13,13 @@ services:
 
   web:
     build: .
-    command: npm run debug
+    command: npm run watch
     depends_on:
         - mariadb
-    volumes:
-      - ./build:/server/build
     ports:
       - "0.0.0.0:3000:3000"
       - "0.0.0.0:5858:5858"
+    env_file: ".env"
     environment:
       TYPEORM_CONNECTION: "mariadb"
       TYPEORM_HOST: mariadb

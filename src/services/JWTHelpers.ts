@@ -3,7 +3,7 @@ import { sign, verify } from "jsonwebtoken";
 import debug from "debug";
 import User from "../entity/User";
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET || 'd21eac993eb73871b12ba4ff6fa3ce75c87f18f0f57175b8855f2358de6afb9a7b75c3c1a9ca39f3afed2c2b46df406ce4212ee1373df98d12dc3510f6e581cb';
 
 interface PayloadInterface {
   id: string;
