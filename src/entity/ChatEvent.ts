@@ -42,7 +42,8 @@ export default class ChatEvent {
 
   getMessage = (): string => {
     if (this.type === ChatEventType.JOIN) {
-      return `${this.owner.username} joined the chat.`;
+      const name = (this.owner && this.owner.username) || "User";
+      return `${name} joined the chat.`;
     }
 
     return this.text;
