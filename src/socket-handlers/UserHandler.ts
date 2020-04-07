@@ -1,10 +1,14 @@
+import { getCustomRepository } from "typeorm";
+import debug from "debug";
+
 import { SocketHandlerInterface } from ".";
 import SocketIOServer, { Socket } from "../services/SocketIOServer";
 import PetsquiApi from "../services/PetsquiApi";
 import { UserRepository } from "../repository";
-import { getCustomRepository } from "typeorm";
 import { User } from "../entity";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
+
+const log = debug("application:socketio:user");
 
 export default class UserHandler implements SocketHandlerInterface {
   private static instance: UserHandler;
@@ -29,18 +33,29 @@ export default class UserHandler implements SocketHandlerInterface {
       this.server.addClient(payload.username, socket);
       fn({ success: true, user: user.toResponse() });
     } catch (err) {
+      log(err);
       fn({ success: false, error: "Authentication failed!" });
     }
   };
 
   getFollowings = (socket: Socket) => async ({ page = 1 }, fn: Function): Promise<void> => {
-    const followings = await this.usersProvider.getFollowings(socket, page);
-    fn({ success: true, followings });
+    try {
+      const followings = await this.usersProvider.getFollowings(socket, page);
+      fn({ success: true, followings });
+    } catch (err) {
+      log(err);
+      fn({ success: false, followings: [] });
+    }
   };
 
   search = (socket: Socket) => async ({query, page = 1}, fn: Function): Promise<void> => {
-    const results = await this.usersProvider.getSearchResults(socket, query, page);
-    fn({ success: true, results });
+    try {
+      const results = await this.usersProvider.getSearchResults(socket, query, page);
+      fn({ success: true, results });
+    } catch (err) {
+      log(err);
+      fn({ success: false, results: [] });
+    }
   };
 
   handle(socket: Socket): void {
