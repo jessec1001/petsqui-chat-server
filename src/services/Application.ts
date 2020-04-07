@@ -27,7 +27,7 @@ export default class Application {
   }
 
   private configureRoutes(): void {
-    this.app.use('/api/token', TokenController.createInstance().getRouter());
+    // this.app.use('/api/token', TokenController.createInstance().getRouter());
   }
 
   start(): void {
