@@ -1,7 +1,8 @@
 import { Entity, ManyToOne, PrimaryColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn } from "typeorm";
 import { v4 } from "uuid";
-import Conversation from "./Conversation";
-import User, { UserResponse } from "./User";
+
+import { UserResponse } from "./User";
+import { User, Conversation } from "./index";
 
 export enum ChatEventType {
   JOIN = "JOIN",
@@ -42,7 +43,7 @@ export default class ChatEvent {
 
   getMessage = (): string => {
     if (this.type === ChatEventType.JOIN) {
-      const name = (this.owner && this.owner.username) || "User";
+      const name = (this.owner && this.owner.username) || "Someone";
       return `${name} joined the chat.`;
     }
 

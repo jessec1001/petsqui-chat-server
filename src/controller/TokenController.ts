@@ -1,25 +1,23 @@
-import { Repository, getRepository, getCustomRepository } from 'typeorm';
+import { getCustomRepository } from 'typeorm';
 import {
   NextFunction, Request, Response, Router,
 } from 'express';
-import User from '../entity/User';
 import ControllerInterface from './ControllerInterface';
-import FailureResponse from '../dto/FailureResponse';
 import { generate } from "../services/JWTHelpers";
-import SuccessResponse from '../dto/SuccessResponse';
-import { ConversationRepository } from '../repository/ConversationRepository';
-import ChatEvent from '../entity/ChatEvent';
+import { FailureResponse, SuccessResponse } from '../dto';
+import { User, ChatEvent } from '../entity';
+import { ConversationRepository, ChatEventRepository, UserRepository } from '../repository';
 import SocketIOServer from '../services/SocketIOServer';
 
 export default class TokenController implements ControllerInterface {
-  private userRepository: Repository<User>;
+  private userRepository: UserRepository;
   private conversationRepository: ConversationRepository;
-  private eventRepository: Repository<ChatEvent>;
+  private eventRepository: ChatEventRepository;
 
   constructor(
-    userRepository: Repository<User>,
+    userRepository: UserRepository,
     conversationRepository: ConversationRepository,
-    eventRepository: Repository<ChatEvent>
+    eventRepository: ChatEventRepository
   ) {
     this.userRepository = userRepository;
     this.conversationRepository = conversationRepository;
@@ -34,9 +32,9 @@ export default class TokenController implements ControllerInterface {
 
   static createInstance(): TokenController {
     return new TokenController(
-      getRepository(User),
+      getCustomRepository(UserRepository),
       getCustomRepository(ConversationRepository),
-      getRepository(ChatEvent)
+      getCustomRepository(ChatEventRepository)
     );
   }
 

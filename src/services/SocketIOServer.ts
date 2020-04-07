@@ -1,16 +1,15 @@
 import IO = require("socket.io");
-import { getCustomRepository, getRepository } from "typeorm";
+import { getCustomRepository } from "typeorm";
 import debug from "debug";
 import Application from "./Application";
 import { toPayload } from "./JWTHelpers";
-import { ConversationRepository } from "../repository/ConversationRepository";
+import { ConversationRepository } from "../repository";
 import Conversation, { ConversationResponse } from "../entity/Conversation";
-import ChatEvent from "../entity/ChatEvent";
-import User from "../entity/User";
+import ChatEventHandler from "../socket-handlers/ChatEventHandler";
 
 const log = debug("application:socket-io");
 
-interface Socket extends IO.Socket {
+export interface Socket extends IO.Socket {
   username: string|null;
 }
 
@@ -82,11 +81,9 @@ export default class SocketIOServer {
 
   private setup(): void {
     const conversationsRepository = getCustomRepository(ConversationRepository);
-    const eventsRepository = getRepository(ChatEvent);
-    const userRepository = getRepository(User);
 
     this.io.on("connection", (socket: Socket) => {
-      socket.json.emit("require auth", async (token: string) => {
+      socket.on("authenticate", async (token: string) => {
         const payload = await toPayload(token);
         socket.username = payload.username;
         this.addClient(payload.username, socket);
@@ -110,52 +107,7 @@ export default class SocketIOServer {
         }
       });
 
-      socket.on("send message", async ({ conversationId, message }, fn) => {
-        // get the conversation.
-        const conversation = await conversationsRepository.findOne(
-          {
-            where: { id: conversationId },
-            relations: ['participants']
-          }
-        );
-
-        if (!conversation) {
-          return fn && fn({ success: false, message: "invalid conversation." });
-        }
-
-        // find message owner.
-        const owner = await userRepository.findOne({ where: { username: socket.username }});
-        if (!owner) {
-          return fn && fn({ success: false, message: "user doesn't exist." });
-        }
-
-        // create message event.
-        const event = ChatEvent.createMessage(owner, conversation, message);
-        await eventsRepository.save(event);
-
-        const eventResponse = event.toResponse();
-        eventResponse.conversationId = conversationId;
-
-        // notify the user.
-        fn && fn({ success: true, event: eventResponse });
-
-        this.emitToConversation(conversation, "new event", { event: eventResponse });
-      });
-
-      socket.on("fetch events", async ({ conversationId, page = 1 }, fn) => {
-        let events = await eventsRepository.find({
-          where: { conversation: { id: conversationId }},
-          take: 20,
-          skip: 20 * (page - 1),
-          order: { createdAt: "DESC" },
-          loadEagerRelations: false,
-          relations: ['owner']
-        });
-
-        events = events.reverse();
-
-        fn({ events: events.map(e => e.toResponse()) });
-      });
+      ChatEventHandler.getInstance().handle(socket);
 
       socket.on("disconnect", () => {
         this.deleteClient(socket);
