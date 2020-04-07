@@ -5,7 +5,7 @@ import Conversation from "../entity/Conversation";
 import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-handlers";
 import { UserResponse } from "../entity/User";
 
-const log = debug("application:socket-io");
+const log = debug("application socket");
 
 export interface Socket extends IO.Socket {
   userId: string|null;

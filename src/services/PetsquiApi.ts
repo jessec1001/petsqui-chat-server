@@ -5,7 +5,7 @@ import { IRequestOptions } from "typed-rest-client";
 import { ObjectLiteral } from "typeorm";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
 import { Socket } from "./SocketIOServer";
-const log = debug("application:petsqui-api");
+const log = debug("application petsqui-api");
 
 export interface UserResponseInterface {
   id: number;

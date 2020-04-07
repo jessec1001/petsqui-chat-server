@@ -32,7 +32,7 @@ export default class Application {
 
   start(): void {
     this.server.listen(process.env['PORT'] || 3000);
-    debug("application:express")(`Application is running on port: ${process.env['PORT'] || 3000}.`);
+    debug("application express")(`Application is running on port: ${process.env['PORT'] || 3000}.`);
   }
 
   getApp(): express.Application {
