@@ -7,7 +7,7 @@ import { Conversation, User } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
 
-const log = debug("application conversation-handler");
+const log = debug("application:socketio:event");
 
 export default class ConversationHandler {
   private static instance: ConversationHandler;
@@ -33,7 +33,6 @@ export default class ConversationHandler {
       );
     } catch (err) {
       log(err);
-      fn({ success: false, conversations: [] });
     }
   };
 

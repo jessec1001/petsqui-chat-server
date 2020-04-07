@@ -6,7 +6,7 @@ import SocketIOServer, { Socket } from "../services/SocketIOServer";
 import { ConversationRepository, ChatEventRepository, UserRepository } from "../repository";
 import { ChatEvent } from "../entity";
 
-const log = debug("application event-handler");
+const log = debug("application:socketio:event");
 
 export default class ChatEventHandler implements SocketHandlerInterface {
   conversationRepository: ConversationRepository;

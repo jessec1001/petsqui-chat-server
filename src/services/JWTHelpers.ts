@@ -28,7 +28,7 @@ export async function toPayload(token: string): Promise<PayloadInterface|null> {
       username: payload.username,
     };
   } catch (err) {
-    debug("application jwt")(err);
+    debug("application:jwt:toPayload")(err);
   }
 
   return null;

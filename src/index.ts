@@ -10,4 +10,4 @@ createConnection().then(() => {
   const app = Application.getInstance();
   SocketIOServer.start(app);
   app.start();
-}).catch(error => debug("application database")(error));
+}).catch(error => debug("application:database")(error));

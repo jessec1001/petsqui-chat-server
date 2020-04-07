@@ -8,7 +8,7 @@ import { UserRepository } from "../repository";
 import { User } from "../entity";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
 
-const log = debug("application user-handler");
+const log = debug("application:socketio:user");
 
 export default class UserHandler implements SocketHandlerInterface {
   private static instance: UserHandler;
