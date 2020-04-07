@@ -56,12 +56,12 @@ export default class Conversation {
       return "";
     }
 
-    return participants.filter(participant => participant.id !== owner.id).join(', ');
+    return participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
   }
 
-  async toResponse(loggedInUsername: string): Promise<ConversationResponse|null> {
+  async toResponse(loggedInId: string): Promise<ConversationResponse|null> {
     const participants = await this.participants;
-    const current = participants.filter(p => p.username === loggedInUsername).pop();
+    const current = participants.filter(p => p.id === loggedInId).pop();
     if (!current) {
       return null;
     }

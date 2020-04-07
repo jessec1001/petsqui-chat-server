@@ -34,19 +34,13 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
     try {
       // get the conversation.
-      const conversation = await this.conversationRepository.findOne(
-        {
-          where: { id: conversationId },
-          relations: ['participants']
-        }
-      );
-
+      const conversation = await this.conversationRepository.findById(conversationId);
       if (!conversation) {
         throw new Error("invalid conversation.");
       }
 
       // find message owner.
-      const owner = await this.userRepository.findOne({ where: { username: socket.username } });
+      const owner = await this.userRepository.findOne(socket.userId);
       if (!owner) {
         throw new Error("user doesn't exist.");
       }
@@ -69,13 +63,14 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       log(JSON.stringify(err));
       return fn && fn({ success: false, message: (err as Error).message });
     }
+
   };
 
   fetchEvents = (socket: Socket) => (
     async ({ conversationId, page = 1 }, fn: Function): Promise<void> => {
       try {
         const events = await this.eventRepository.find({
-          where: { conversation: { id: conversationId }},
+          where: { conversation: { id: conversationId } },
           take: 20,
           skip: 20 * (page - 1),
           order: { createdAt: "DESC" },
@@ -97,8 +92,8 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   }
 
   static getInstance(): ChatEventHandler {
-    if (!ChatEventHandler.instance) {
-      ChatEventHandler.instance = new ChatEventHandler(
+    if (!this.instance) {
+      this.instance = new ChatEventHandler(
         getCustomRepository(ConversationRepository),
         getCustomRepository(ChatEventRepository),
         getCustomRepository(UserRepository),
@@ -106,6 +101,6 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       );
     }
 
-    return ChatEventHandler.instance;
+    return this.instance;
   }
 }

@@ -1,16 +1,16 @@
 import IO = require("socket.io");
-import { getCustomRepository } from "typeorm";
 import debug from "debug";
 import Application from "./Application";
-import { toPayload } from "./JWTHelpers";
-import { ConversationRepository } from "../repository";
-import Conversation, { ConversationResponse } from "../entity/Conversation";
-import ChatEventHandler from "../socket-handlers/ChatEventHandler";
+import Conversation from "../entity/Conversation";
+import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-handlers";
+import { UserResponse } from "../entity/User";
 
 const log = debug("application:socket-io");
 
 export interface Socket extends IO.Socket {
-  username: string|null;
+  userId: string|null;
+  user: UserResponse;
+  token: string|null;
 }
 
 export default class SocketIOServer {
@@ -27,8 +27,9 @@ export default class SocketIOServer {
     this.setup();
   }
 
-  private addClient(id: string, socket: Socket): void {
-    log("add client", id, socket.id);
+  public addClient(id: string, socket: Socket): void {
+    log("add client", id, socket.userId);
+    this.deleteClient(socket);
     if (!this.clients.has(id)) {
       this.clients.set(id, new Set());
     }
@@ -36,20 +37,20 @@ export default class SocketIOServer {
     this.clients.get(id).add(socket);
   }
 
-  public getClients(username: string): Set<Socket> {
-    log("get clients", username);
-    if (this.clients.has(username)) {
-      log("got clients", username);
-      return this.clients.get(username);
+  public getClients(id: string): Set<Socket> {
+    log("get clients", id);
+    if (this.clients.has(id)) {
+      log("got clients", id);
+      return this.clients.get(id);
     }
 
     return new Set();
   }
 
   public deleteClient(socket: Socket): void {
-    if (this.clients.has(socket.username)) {
-      log("delete clients", socket.username, socket.id);
-      this.clients.get(socket.username).delete(socket);
+    if (socket.userId && this.clients.has(socket.userId)) {
+      log("delete clients", socket.userId, socket.userId);
+      this.clients.get(socket.userId).delete(socket);
     }
   }
 
@@ -60,8 +61,8 @@ export default class SocketIOServer {
     skip: string[] = []
   ): Promise<void> {
     const participants = (await conversation.participants);
-    participants.filter(p => skip.indexOf(p.username) < 0).forEach(p => {
-      const clients = this.getClients(p.username);
+    participants.filter(p => skip.indexOf(p.id) < 0).forEach(p => {
+      const clients = this.getClients(p.id);
       clients.forEach(client => {
         client.json.emit(event, payload);
       });
@@ -69,45 +70,21 @@ export default class SocketIOServer {
   }
 
   public emitToUser(
-    username: string,
+    id: string,
     event: string,
     payload: {}
   ): void {
-    const clients = this.getClients(username);
+    const clients = this.getClients(id);
     clients.forEach(client => {
       client.json.emit(event, payload);
     });
   }
 
   private setup(): void {
-    const conversationsRepository = getCustomRepository(ConversationRepository);
-
     this.io.on("connection", (socket: Socket) => {
-      socket.on("authenticate", async (token: string) => {
-        const payload = await toPayload(token);
-        socket.username = payload.username;
-        this.addClient(payload.username, socket);
-
-        if (socket.username) {
-          try {
-            const conversations = await conversationsRepository
-              .getConversations(socket.username);
-
-            const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {
-              return c.toResponse(socket.username);
-            };
-
-            socket.json.emit(
-              "update conversations",
-              await Promise.all(conversations.map(transformConversation))
-            );
-          } catch (err) {
-            log(err);
-          }
-        }
-      });
-
+      UserHandler.getInstance().handle(socket);
       ChatEventHandler.getInstance().handle(socket);
+      ConversationHandler.getInstance().handle(socket);
 
       socket.on("disconnect", () => {
         this.deleteClient(socket);
