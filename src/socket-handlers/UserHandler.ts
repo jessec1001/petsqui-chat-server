@@ -1,6 +1,6 @@
 import { SocketHandlerInterface } from ".";
 import SocketIOServer, { Socket } from "../services/SocketIOServer";
-import PetsquiApi from "../services/PetsquiAPI";
+import PetsquiApi from "../services/PetsquiApi";
 import { UserRepository } from "../repository";
 import { getCustomRepository } from "typeorm";
 import { User } from "../entity";
