@@ -30,7 +30,7 @@ export default class UserHandler implements SocketHandlerInterface {
       socket.userId = payload.id;
       socket.user = payload;
       socket.token = token;
-      this.server.addClient(payload.username, socket);
+      this.server.addClient(payload.id, socket);
       fn({ success: true, user: user.toResponse() });
     } catch (err) {
       log(err);
