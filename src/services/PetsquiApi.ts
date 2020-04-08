@@ -77,6 +77,10 @@ export default class PetsquiApi implements UsersProviderInterface {
 
   async getSearchResults(socket: Socket, query: string, page: number): Promise<UserResponse[]> {
     try {
+      if (!page || page < 1) {
+        page = 1;
+      }
+
       const response = await this.client.get<SearchResultsInterface>(
         `/api/v1/search/`,
         {
@@ -85,7 +89,7 @@ export default class PetsquiApi implements UsersProviderInterface {
             params: {
               q: query,
               limit: 10,
-              offset: page * 10
+              offset: (page - 1) * 10
             },
           },
         },
@@ -142,6 +146,10 @@ export default class PetsquiApi implements UsersProviderInterface {
   }
 
   async getFollowings(socket: Socket, page: number): Promise<UserResponse[]> {
+    if (!page || page < 1) {
+      page = 1;
+    }
+
     try {
       const response = await this.client.get<FollowingsResponseInterface>(
         `/api/v1/users/${socket.userId}/followings/`,
@@ -150,7 +158,7 @@ export default class PetsquiApi implements UsersProviderInterface {
           queryParameters: {
             params: {
               limit: 10,
-              offset: page * 10,
+              offset: (page - 1) * 10,
             }
           }
         },
