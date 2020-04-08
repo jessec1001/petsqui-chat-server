@@ -60,7 +60,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
         fn({ success: true, event: eventResponse });
       }
     } catch (err) {
-      log(JSON.stringify(err));
+      log(err);
       return fn && fn({ success: false, message: (err as Error).message });
     }
 
@@ -80,7 +80,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
         fn({ success: true, events: events.map(e => e.toResponse()) });
       } catch (err) {
-        log(JSON.stringify(err));
+        log(err);
         fn({ success: false, events: [] });
       }
     }
