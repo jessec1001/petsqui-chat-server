@@ -10,6 +10,8 @@ services:
       MYSQL_USER: "test"
       MYSQL_PASSWORD: "test"
       MYSQL_DATABASE: "test"
+    volumes:
+      - mysql-volume:/var/lib/mysql
 
   web:
     build: .
@@ -20,18 +22,6 @@ services:
       - "0.0.0.0:5858:5858"
     env_file: ".env"
     restart: always
-    environment:
-      TYPEORM_CONNECTION: "mariadb"
-      TYPEORM_HOST: mariadb
-      TYPEORM_USERNAME: "test"
-      TYPEORM_PASSWORD: "test"
-      TYPEORM_DATABASE: "test"
-      TYPEORM_PORT: 3306
-      TYPEORM_SYNCHRONIZE: 1
-      TYPEORM_LOGGING: 1
-      TYPEORM_ENTITIES: "build/entity/**/*.js"
-      TYPEORM_MIGRATIONS: "build/migration/**/*.js"
-      TYPEORM_SUBSCRIBERS: "build/subscriber/**/*.js"
-      TYPEORM_ENTITIES_DIR: "build/entity"
-      TYPEORM_MIGRATIONS_DIR: "build/migration"
-      TYPEORM_SUBSCRIBERS_DIR: "build/subscriber"
+
+volumes:
+  mysql-volume:
