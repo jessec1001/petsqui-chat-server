@@ -1,10 +1,10 @@
 import { getCustomRepository } from "typeorm";
 import debug from "debug";
 
+import { ChatEvent } from "../entity";
+import { ConversationRepository, ChatEventRepository, UserRepository } from "../repository";
 import SocketHandlerInterface from "./SocketHandlerInterface";
 import SocketIOServer, { Socket } from "../services/SocketIOServer";
-import { ConversationRepository, ChatEventRepository, UserRepository } from "../repository";
-import { ChatEvent } from "../entity";
 
 const log = debug("application:event-handler");
 

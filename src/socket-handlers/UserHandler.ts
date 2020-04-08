@@ -1,12 +1,12 @@
 import { getCustomRepository } from "typeorm";
 import debug from "debug";
 
-import { SocketHandlerInterface } from ".";
-import SocketIOServer, { Socket } from "../services/SocketIOServer";
-import PetsquiApi from "../services/PetsquiApi";
-import { UserRepository } from "../repository";
 import { User } from "../entity";
+import { UserRepository } from "../repository";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
+import SocketIOServer, { Socket } from "../services/SocketIOServer";
+import { SocketHandlerInterface } from ".";
+import PetsquiApi from "../services/PetsquiApi";
 
 const log = debug("application:user-handler");
 

@@ -1,9 +1,9 @@
 import IO = require("socket.io");
 import debug from "debug";
 import Application from "./Application";
-import Conversation from "../entity/Conversation";
-import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-handlers";
+import { Conversation } from "../entity";
 import { UserResponse } from "../entity/User";
+import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-handlers";
 
 const log = debug("application:socket-server");
 

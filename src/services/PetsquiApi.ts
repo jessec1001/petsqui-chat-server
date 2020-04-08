@@ -1,8 +1,8 @@
 import { RestClient } from "typed-rest-client";
 import debug from "debug";
-import { UserResponse } from "../entity/User";
 import { IRequestOptions } from "typed-rest-client";
 import { ObjectLiteral } from "typeorm";
+import { UserResponse } from "../entity/User";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
 import { Socket } from "./SocketIOServer";
 const log = debug("application:petsqui-api");

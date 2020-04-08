@@ -1,11 +1,11 @@
 import debug from "debug";
 
-import { Socket } from "../services/SocketIOServer";
-import { ConversationRepository, UserRepository } from "../repository";
 import { getCustomRepository } from "typeorm";
 import { Conversation, User } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
+import { ConversationRepository, UserRepository } from "../repository";
+import { Socket } from "../services/SocketIOServer";
 
 const log = debug("application:conversation-handler");
 
