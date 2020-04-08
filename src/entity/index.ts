@@ -1,3 +1,9 @@
-export { default as ChatEvent } from "./ChatEvent";
-export { default as Conversation } from "./Conversation";
-export { default as User } from "./User";
+import ChatEvent from "./ChatEvent";
+import Conversation from "./Conversation";
+import User from "./User";
+
+export {
+  ChatEvent,
+  Conversation,
+  User,
+};
