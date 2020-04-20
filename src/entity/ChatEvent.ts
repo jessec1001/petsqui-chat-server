@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn } from "typeorm";
+import { Entity, ManyToOne, PrimaryColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
 import { v4 } from "uuid";
 
 import { UserResponse } from "./User";
@@ -24,6 +24,20 @@ export default class ChatEvent {
   @ManyToOne(() => User, { eager: true })
   @JoinColumn()
   owner: User;
+
+  @ManyToMany(() => User, { cascade: true, lazy: true })
+  @JoinTable({
+    name: "eventReads",
+    inverseJoinColumn: {
+      name: "userId",
+      referencedColumnName: "id",
+    },
+    joinColumn: {
+      name: "eventId",
+      referencedColumnName: "id",
+    }
+  })
+  private reads: Promise<User[]>;
 
   @ManyToOne(() => Conversation, conversation => conversation.events, { cascade: true, eager: true })
   conversation: Conversation;

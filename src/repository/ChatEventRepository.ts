@@ -1,4 +1,4 @@
-import { Repository, EntityRepository, MoreThan, LessThan } from "typeorm";
+import { Repository, EntityRepository, MoreThan, LessThan, QueryBuilder } from "typeorm";
 import ChatEvent from "../entity/ChatEvent";
 
 interface OptionsInput {
@@ -9,8 +9,42 @@ interface OptionsInput {
   page: number;
 }
 
+interface UnreadCount {
+  conversationId: string;
+  unreadCount: number;
+}
+
 @EntityRepository(ChatEvent)
 export default class ChatEventRepository extends Repository<ChatEvent> {
+  async getUnreadStats(userId: string): Promise<UnreadCount[]> {
+    return this.createQueryBuilder("event")
+      .select("DISTINCT(conversation.id)", "conversationId")
+      .addSelect("COUNT(*)", "unreadCount")
+      .innerJoin("event.conversation", "conversation")
+      .innerJoin("conversation.participants", "participant", "participant.id = :userId", { userId })
+      .leftJoin("event.reads", "reads")
+      .where("reads.id is null")
+      .groupBy("conversation.id")
+      .getRawMany();
+  }
+
+  async markRead(conversationId: string, userId: string): Promise<boolean> {
+    try {
+      const tableName = this.metadata.tableName;
+      const query = `
+      INSERT IGNORE INTO eventReads(eventId, userId)
+        SELECT event.id, ? FROM ${tableName} event
+        INNER JOIN conversation ON conversation.id = event.conversationId
+        WHERE conversation.id = ?
+      `;
+      this.query(query, [userId, conversationId]);
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
+  }
+
   async findByOptions(options: Partial<OptionsInput>): Promise<ChatEvent[]> {
     let page = 1;
     if (options.page && options.page > 0) {
