@@ -104,9 +104,10 @@ export default class ChatEvent {
   /**
    * @throws Will throw if the user is not part of the conversation.
    **/
-  static createMessage(user: User, conversation: Conversation, text: string): ChatEvent {
-    const event = this.create(ChatEventType.MESSAGE, user, conversation);
+  static createMessage(owner: User, conversation: Conversation, text: string): ChatEvent {
+    const event = this.create(ChatEventType.MESSAGE, owner, conversation);
     event.text = text;
+    event.reads = new Promise((resolve) => resolve([owner]));
     return event;
   }
 }
