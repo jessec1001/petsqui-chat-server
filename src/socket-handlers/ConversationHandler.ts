@@ -19,7 +19,7 @@ export default class ConversationHandler {
     this.userRepository = userRepository;
   }
 
-  fetchConversations = (socket: Socket) => async (fn: Function): Promise<void> => {
+  fetch = (socket: Socket) => async (fn: Function): Promise<void> => {
     try {
       const conversations = await this.conversationRepository
         .getConversations(socket.userId);
@@ -37,7 +37,7 @@ export default class ConversationHandler {
     }
   };
 
-  createConversation = (socket: Socket) => async (
+  create = (socket: Socket) => async (
     { participants }: { participants: UserResponse[] }, fn: Function
   ): Promise<void> => {
     try {
@@ -64,8 +64,8 @@ export default class ConversationHandler {
   };
 
   public handle(socket: Socket): void {
-    socket.on("fetch_conversations", this.fetchConversations(socket));
-    socket.on("create_conversation", this.createConversation(socket));
+    socket.on("conversations:fetch", this.fetch(socket));
+    socket.on("conversations:create", this.create(socket));
   }
 
   public static getInstance(): ConversationHandler {

@@ -1,4 +1,4 @@
-import { Repository, EntityRepository, MoreThan, LessThan, QueryBuilder } from "typeorm";
+import { Repository, EntityRepository, MoreThan, LessThan } from "typeorm";
 import ChatEvent from "../entity/ChatEvent";
 
 interface OptionsInput {
@@ -28,7 +28,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .getRawMany();
   }
 
-  async markRead(conversationId: string, userId: string): Promise<boolean> {
+  async markConversationRead(conversationId: string, userId: string): Promise<boolean> {
     try {
       const tableName = this.metadata.tableName;
       const query = `
@@ -40,7 +40,16 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       this.query(query, [userId, conversationId]);
       return true;
     } catch (err) {
-      console.error(err);
+      return false;
+    }
+  }
+
+  async markEventRead(eventId: string, userId: string): Promise<boolean> {
+    try {
+      const query = "INSERT IGNORE INTO eventReads(eventId, userId) VALUES(?, ?)";
+      this.query(query, [eventId, userId]);
+      return true;
+    } catch (err) {
       return false;
     }
   }

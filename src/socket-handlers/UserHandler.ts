@@ -59,9 +59,9 @@ export default class UserHandler implements SocketHandlerInterface {
   };
 
   handle(socket: Socket): void {
-    socket.on("authenticate", this.authenticate(socket));
-    socket.on("get_followings", this.getFollowings(socket));
-    socket.on("search_users", this.search(socket));
+    socket.on("users:authenticate", this.authenticate(socket));
+    socket.on("users:get_followings", this.getFollowings(socket));
+    socket.on("users:search", this.search(socket));
   }
 
   public static getInstance(): UserHandler {

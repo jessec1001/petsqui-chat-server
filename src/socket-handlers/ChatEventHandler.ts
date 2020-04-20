@@ -27,7 +27,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
     this.server = server;
   }
 
-  sendMessage = (socket: Socket) => async (
+  newMessage = (socket: Socket) => async (
     { conversationId, message },
     fn: Function
   ): Promise<void> => {
@@ -53,7 +53,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       eventResponse.conversationId = conversationId;
 
       // send to all participants.
-      this.server.emitToConversation(conversation, "new event", { event: eventResponse });
+      this.server.emitToConversation(conversation, "events:event_created", { event: eventResponse });
 
       // notify the user.
       if (fn) {
@@ -66,7 +66,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
   };
 
-  fetchEvents = (socket: Socket) => (
+  fetch = (socket: Socket) => (
     async ({ conversationId, page = 1 }, fn: Function): Promise<void> => {
       try {
         const events = await this.eventRepository.find({
@@ -86,9 +86,40 @@ export default class ChatEventHandler implements SocketHandlerInterface {
     }
   );
 
+  getUnreadEventsCount = (socket: Socket) => async (fn): Promise<void> => {
+    if (!socket.userId) {
+      fn({ success: false, stats: [] });
+      return;
+    }
+
+    try {
+      const stats = await this.eventRepository.getUnreadStats(socket.userId);
+      fn({ success: true, stats });
+    } catch (err) {
+      log(err);
+      fn({ success: false, stats: [] });
+    }
+  };
+
+  markRead = (socket: Socket) => async ({ conversationId, eventId }, fn): Promise<void> => {
+    if (socket.userId) {
+      if (conversationId) {
+        const success = await this.eventRepository.markConversationRead(conversationId, socket.userId);
+        fn({ success });
+      } else {
+        const success = await this.eventRepository.markEventRead(eventId, socket.userId);
+        fn({ success });
+      }
+    } else {
+      fn({ success: false });
+    }
+  };
+
   handle(socket: Socket): void {
-    socket.on("send message", this.sendMessage(socket));
-    socket.on("fetch events", this.fetchEvents(socket));
+    socket.on("events:new_message", this.newMessage(socket));
+    socket.on("events:fetch", this.fetch(socket));
+    socket.on("events:get_unread_count", this.getUnreadEventsCount(socket));
+    socket.on("events:mark_read", this.markRead(socket));
   }
 
   static getInstance(): ChatEventHandler {
