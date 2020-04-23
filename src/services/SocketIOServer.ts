@@ -89,6 +89,16 @@ export default class SocketIOServer {
       socket.on("disconnect", () => {
         this.deleteClient(socket);
       });
+
+      // require authentication.
+      socket.use((packet, next: Function) => {
+        if (packet[0] !== 'users:authenticate' && !socket.token) {
+          socket.emit("users:require_authentication", { event: packet[0], payload: packet[1] });
+          return next(new Error("Authentication failed."));
+        }
+
+        next();
+      });
     });
   }
 
