@@ -26,7 +26,11 @@ export default class ConversationRepository extends Repository<Conversation> {
   async getConversations(id: string, page = 1, take = 20): Promise<Conversation[]> {
     return this.createQueryBuilder("conversation")
       .leftJoin("conversation.participants", "participants")
-      .leftJoinAndMapOne("conversation.lastEvent", "conversation.events", "lastEvent")
+      .leftJoinAndMapOne("conversation.lastEvent", (subQuery) => {
+        return subQuery.select()
+          .from(ChatEvent, 'lastEvent')
+          .orderBy('createdAt', 'DESC');
+      }, "lastEvent", "lastEvent.`conversationId` = conversation.id")
       .where("participants.id = :id", { id })
       .take(20)
       .skip((page - 1) * take)
