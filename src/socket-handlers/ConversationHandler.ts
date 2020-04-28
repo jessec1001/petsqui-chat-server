@@ -4,7 +4,7 @@ import { getCustomRepository } from "typeorm";
 import { Conversation, User } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
-import { ConversationRepository, UserRepository } from "../repository";
+import { ConversationRepository, UserRepository, ChatEventRepository } from "../repository";
 import { Socket } from "../services/SocketIOServer";
 
 const log = debug("application:conversation-handler");
@@ -12,17 +12,25 @@ const log = debug("application:conversation-handler");
 export default class ConversationHandler {
   private static instance: ConversationHandler;
   private conversationRepository: ConversationRepository;
+  private eventsRepository: ChatEventRepository;
   private userRepository: UserRepository;
 
-  constructor(conversationRepository: ConversationRepository, userRepository: UserRepository) {
+  constructor(
+    conversationRepository: ConversationRepository,
+    userRepository: UserRepository,
+    eventsRepository: ChatEventRepository
+  ) {
     this.conversationRepository = conversationRepository;
     this.userRepository = userRepository;
+    this.eventsRepository = eventsRepository;
   }
 
   fetch = (socket: Socket) => async (fn: Function): Promise<void> => {
     try {
-      const conversations = await this.conversationRepository
+      let conversations = await this.conversationRepository
         .getConversations(socket.userId);
+
+      conversations = await this.eventsRepository.mapLastEvent(conversations);
 
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {
         return c.toResponse(socket.userId);
@@ -94,6 +102,7 @@ export default class ConversationHandler {
       this.instance = new ConversationHandler(
         getCustomRepository(ConversationRepository),
         getCustomRepository(UserRepository),
+        getCustomRepository(ChatEventRepository)
       );
     }
 

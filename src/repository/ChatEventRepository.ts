@@ -1,5 +1,6 @@
 import { Repository, EntityRepository, MoreThan, LessThan } from "typeorm";
 import ChatEvent from "../entity/ChatEvent";
+import { Conversation } from "../entity";
 
 interface OptionsInput {
   username: string;
@@ -26,6 +27,30 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .where("reads.id is null")
       .groupBy("conversation.id")
       .getRawMany();
+  }
+
+  async mapLastEvent(conversations: Conversation[]): Promise<Conversation[]> {
+    const events = await this.createQueryBuilder()
+      .select("event").from(ChatEvent, "event")
+      .innerJoinAndSelect("event.conversation", "conversation")
+      .innerJoinAndSelect("event.owner", "owner")
+      .innerJoin(subQuery => {
+        return subQuery
+          .select("conversationId, MAX(updatedAt) updatedAt")
+          .from(ChatEvent, "last")
+          .orderBy("updatedAt", "DESC")
+          .groupBy("conversationId");
+      }, "last", "`last`.`conversationId` = conversation.id AND last.updatedAt = event.updatedAt")
+      .where("conversation.id IN (:ids)", { ids: conversations.map(c => c.id) })
+      .getMany();
+
+    return conversations.map(c => {
+      const event = events.find(e => e.conversation.id === c.id);
+      if (event) {
+        c.lastEvent = event;
+      }
+      return c;
+    });
   }
 
   async markConversationRead(conversationId: string, userId: string): Promise<boolean> {
