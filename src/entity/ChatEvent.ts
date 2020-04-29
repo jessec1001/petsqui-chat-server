@@ -6,6 +6,7 @@ import { User, Conversation } from "./index";
 
 export enum ChatEventType {
   JOIN = "JOIN",
+  LEAVE = "LEAVE",
   MESSAGE = "MESSAGE",
 }
 
@@ -56,9 +57,13 @@ export default class ChatEvent {
   };
 
   getMessage = (): string => {
+    const name = (this.owner && this.owner.username) || "Someone";
     if (this.type === ChatEventType.JOIN) {
-      const name = (this.owner && this.owner.username) || "Someone";
-      return `${name} joined the chat.`;
+      return `${name} joined the conversation.`;
+    }
+
+    if (this.type === ChatEventType.LEAVE) {
+      return `${name} left the conversation.`;
     }
 
     return this.text;
@@ -99,6 +104,14 @@ export default class ChatEvent {
     }
 
     return this.create(ChatEventType.JOIN, owner, conversation);
+  }
+
+  static createUserLeft(owner: User, conversation: Conversation): ChatEvent {
+    if (!conversation.hasParticipant(owner)) {
+      throw new Error('User is not part of the conversation.');
+    }
+
+    return this.create(ChatEventType.LEAVE, owner, conversation);
   }
 
   /**

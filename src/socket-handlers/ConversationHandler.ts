@@ -1,7 +1,7 @@
 import debug from "debug";
 
 import { getCustomRepository } from "typeorm";
-import { Conversation, User } from "../entity";
+import { Conversation, User, ChatEvent } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
 import { ConversationRepository, UserRepository, ChatEventRepository } from "../repository";
@@ -81,9 +81,18 @@ export default class ConversationHandler {
       }
 
       const participants = await conversation.participants;
+      const owner = participants.find(participant => participant.id === socket.userId);
+      if (!owner) {
+        throw new Error("Invalid conversation.");
+      }
+
+      const leftEvent = ChatEvent.createUserLeft(owner, conversation);
       const newParticipants = participants.filter(participant => participant.id != socket.userId);
       conversation.participants = new Promise((resolve) => resolve(newParticipants));
+
       this.conversationRepository.save(conversation);
+      this.eventsRepository.save(leftEvent);
+
       return fn({ success: true });
     } catch (error) {
       log(error);
