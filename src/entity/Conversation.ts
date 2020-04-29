@@ -53,10 +53,15 @@ export default class Conversation {
     }
 
     if (!participants) {
-      return "";
+      return "Deleted";
     }
 
-    return participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
+    const name = participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
+    if (!name) {
+      return owner.username;
+    }
+
+    return name;
   }
 
   async toResponse(loggedInId: string): Promise<ConversationResponse|null> {
