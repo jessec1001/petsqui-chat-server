@@ -52,13 +52,13 @@ export default class Conversation {
       participants = await this.participants;
     }
 
-    if (!participants) {
-      return "Deleted";
+    let name = "";
+    if (Array.isArray(participants)) {
+      name = participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
     }
 
-    const name = participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
     if (!name) {
-      return owner.username;
+      name = owner.username;
     }
 
     return name;
