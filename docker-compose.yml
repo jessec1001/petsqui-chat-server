@@ -5,6 +5,8 @@ services:
     image: "mariadb:10.1.16"
     expose:
       - 3306
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES UTF8mb4;' --innodb-flush-log-at-trx-commit=0
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "admin"
       MYSQL_USER: "test"
