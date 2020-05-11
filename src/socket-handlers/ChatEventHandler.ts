@@ -33,16 +33,20 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   ): Promise<void> => {
 
     try {
+      if (typeof message !== 'string' || message.trim().length <= 0) {
+        throw new Error("Invalid Message.");
+      }
+
       // get the conversation.
       const conversation = await this.conversationRepository.findById(conversationId);
       if (!conversation) {
-        throw new Error("invalid conversation.");
+        throw new Error("Invalid conversation.");
       }
 
       // find message owner.
       const owner = await this.userRepository.findOne(socket.userId);
       if (!owner) {
-        throw new Error("user doesn't exist.");
+        throw new Error("Invalid user logged in.");
       }
 
       // create message event.
@@ -61,7 +65,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       }
     } catch (err) {
       log(err);
-      return fn && fn({ success: false, message: (err as Error).message });
+      return fn && fn({ success: false, error: (err as Error).message });
     }
 
   };
