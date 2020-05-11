@@ -24,8 +24,11 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .innerJoin("event.conversation", "conversation")
       .innerJoin("conversation.participants", "participant", "participant.id = :userId", { userId })
       .leftJoin((qb) => {
-        return qb.select("eventId").addSelect("userId").from("eventReads", "reads");
-      }, "reads", "reads.eventId = event.id AND reads.userId = :userId", { userId })
+        return qb.select("eventId")
+          .addSelect("userId")
+          .from("eventReads", "reads")
+          .where("reads.userId = :userId", { userId });
+      }, "reads", "reads.eventId = event.id")
       .where("reads.userId is null")
       .groupBy("conversation.id")
       .getRawMany();
