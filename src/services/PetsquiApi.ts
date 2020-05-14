@@ -152,7 +152,7 @@ export default class PetsquiApi implements UsersProviderInterface {
 
     try {
       const response = await this.client.get<FollowingsResponseInterface>(
-        "/api/v1/users/me/followings/",
+        `/api/v1/users/${socket.userId}/followings/`,
         {
           ...this.getDefaultOptions(socket.token),
           queryParameters: {
@@ -166,13 +166,17 @@ export default class PetsquiApi implements UsersProviderInterface {
 
       return response.result.results.map(result => {
         const user = result.following_user && result.following_user;
+        if (!user || !user.username) {
+          return null;
+        }
+
         return {
           id: user.uuid,
           username: user.username,
           avatar: user.avatar && user.avatar.url,
           color: user.color && user.color.color,
         };
-      });
+      }).filter(u => u != null);
     } catch (err) {
       log(err);
       return [];
