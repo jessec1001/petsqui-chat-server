@@ -164,11 +164,10 @@ export default class PetsquiApi implements UsersProviderInterface {
         },
       );
 
-      return response.result.results.map(result => {
-        const user = result.following_user && result.following_user;
-        if (!user || !user.username) {
-          return null;
-        }
+      return response.result.results.filter(result => {
+        return result && result.following_user && result.following_user.username;
+      }).map(result => {
+        const user = result.following_user;
 
         return {
           id: user.uuid,
@@ -176,7 +175,7 @@ export default class PetsquiApi implements UsersProviderInterface {
           avatar: user.avatar && user.avatar.url,
           color: user.color && user.color.color,
         };
-      }).filter(u => u != null);
+      });
     } catch (err) {
       log(err);
       return [];
