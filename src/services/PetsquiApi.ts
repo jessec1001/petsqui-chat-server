@@ -152,7 +152,7 @@ export default class PetsquiApi implements UsersProviderInterface {
 
     try {
       const response = await this.client.get<FollowingsResponseInterface>(
-        `/api/v1/users/${socket.userId}/followings/`,
+        "/api/v1/users/me/followings/",
         {
           ...this.getDefaultOptions(socket.token),
           queryParameters: {
