@@ -13,6 +13,9 @@ async function init(): Promise<void> {
     await createConnection({
       ...connectionOptions,
       charset: 'UTF8MB4_GENERAL_CI',
+      //maxQueryExecutionTime: 1000,
+      //logging: ["query", "error"],
+      //logger: "advanced-console"
     } as MysqlConnectionOptions);
   } catch (error) {
     debug("application:database")(error);

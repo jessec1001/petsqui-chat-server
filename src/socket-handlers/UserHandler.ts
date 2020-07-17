@@ -22,14 +22,21 @@ export default class UserHandler implements SocketHandlerInterface {
     this.userRepository = userRepository;
   }
 
-  authenticate = (socket: Socket) => async (token: string, fn: Function): Promise<void> => {
+  authenticate = (socket: Socket) => async (options: Array<string | number>, fn: Function): Promise<void> => {
     try {
-      const payload = await this.usersProvider.authenticate(token);
+      const payload = await this.usersProvider.authenticate(options);
+      const userExists = await this.userRepository.findByID(payload.id);
+      let overwriteKeys = false;
+      if (userExists) {
+        if (!userExists.public_key) {
+          overwriteKeys = true;
+        }
+      }
       const user = User.createFromResponse(payload);
-      await this.userRepository.insertOrUpdate(user);
+      await this.userRepository.insertOrUpdate(user,overwriteKeys);
       socket.userId = payload.id;
       socket.user = payload;
-      socket.token = token;
+      socket.options = options;
       this.server.addClient(payload.id, socket);
       fn({ success: true, user: user.toResponse() });
     } catch (err) {
@@ -41,7 +48,22 @@ export default class UserHandler implements SocketHandlerInterface {
   getFollowings = (socket: Socket) => async ({ page = 1 }, fn: Function): Promise<void> => {
     try {
       const followings = await this.usersProvider.getFollowings(socket, page);
-      fn({ success: true, followings });
+      const keys = await this.userRepository.bulkSelectKeys(followings.map(p=>p.id));
+      const keysMap  = {};
+      keys.map(k=>{
+        keysMap[k.id] = k.public_key;
+      });
+      const followingsWithKeys = followings.map(p => {
+        if (keysMap[p.id]) {
+          p.public_key = keysMap[p.id];
+        } else {
+          p.public_key = "";
+        }
+        return p;
+      });
+      //const users = followings.map(p => User.createFromResponse(p));
+      //this.userRepository.bulkInsertOrUpdate(users);
+      fn({ success: true, followings: followingsWithKeys });
     } catch (err) {
       log(err);
       fn({ success: false, followings: [] });

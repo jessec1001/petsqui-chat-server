@@ -52,10 +52,8 @@ export default class ConversationHandler {
       if (socket.user) {
         const conversation = new Conversation();
         participants.push(socket.user);
-
         const users = participants.map(p => User.createFromResponse(p));
         this.userRepository.bulkInsertOrUpdate(users);
-
         users.forEach(u => {
           conversation.addParticipant(u);
         });

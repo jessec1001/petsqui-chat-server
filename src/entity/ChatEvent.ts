@@ -19,7 +19,7 @@ export default class ChatEvent {
   @PrimaryColumn("varchar", { length: 36 })
   id: string;
 
-  @Column()
+  @Column({length: 8})
   type: ChatEventType;
 
   @ManyToOne(() => User, { eager: true })
@@ -43,7 +43,7 @@ export default class ChatEvent {
   @ManyToOne(() => Conversation, conversation => conversation.events, { cascade: true, eager: true })
   conversation: Conversation;
 
-  @Column()
+  @Column("longtext")
   text: string;
 
   @UpdateDateColumn()

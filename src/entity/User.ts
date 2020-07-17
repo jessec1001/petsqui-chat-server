@@ -19,8 +19,14 @@ export default class User {
   @Column()
   username: string;
 
-  @Column({ nullable: true })
+  @Column()
   avatar: string;
+
+  @Column()
+  salt: string;
+
+  @Column()
+  public_key: string;
 
   @Column({ nullable: true })
   color: string;
@@ -43,6 +49,8 @@ export default class User {
       username: this.username,
       color: this.color,
       avatar: this.avatar,
+      salt: this.salt,
+      public_key: this.public_key,
     };
   }
 
@@ -55,6 +63,8 @@ export default class User {
 
   updateFromResponse(userResponse: UserResponse): void {
     this.username = userResponse.username;
+    this.salt = userResponse.salt;
+    this.public_key = userResponse.public_key;
     if (userResponse.avatar) {
       this.avatar = userResponse.avatar;
     }
@@ -70,4 +80,6 @@ export interface UserResponse {
   username: string;
   color?: string;
   avatar?: string;
+  public_key ?: string;
+  salt ?: string;
 }

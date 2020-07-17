@@ -10,7 +10,7 @@ const log = debug("application:socket-server");
 export interface Socket extends IO.Socket {
   userId: string|null;
   user: UserResponse;
-  token: string|null;
+  options: Record<string,any>|null;
 }
 
 export default class SocketIOServer {
@@ -38,9 +38,9 @@ export default class SocketIOServer {
   }
 
   public getClients(id: string): Set<Socket> {
-    log("get clients", id);
+    //log("get clients", id);
     if (this.clients.has(id)) {
-      log("got clients", id);
+      //log("got clients", id);
       return this.clients.get(id);
     }
 
@@ -92,7 +92,7 @@ export default class SocketIOServer {
 
       // require authentication.
       socket.use((packet, next: Function) => {
-        if (packet[0] !== 'users:authenticate' && !socket.token) {
+        if (packet[0] !== 'users:authenticate' && (!socket.options || !socket.options.token)) {
           socket.emit("users:require_authentication", { event: packet[0], payload: packet[1] });
           return next(new Error("Authentication failed."));
         }

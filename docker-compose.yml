@@ -12,8 +12,6 @@ services:
       MYSQL_USER: "test"
       MYSQL_PASSWORD: "test"
       MYSQL_DATABASE: "test"
-    volumes:
-      - mysql-volume:/var/lib/mysql
 
   web:
     build: .
@@ -32,5 +30,3 @@ services:
       TYPEORM_PORT: 3306
       TYPEORM_SYNCHRONIZE: 1
 
-volumes:
-  mysql-volume:

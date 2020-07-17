@@ -1,3 +1,4 @@
+/*
 import { getCustomRepository } from 'typeorm';
 import {
   NextFunction, Request, Response, Router,
@@ -72,3 +73,4 @@ export default class TokenController implements ControllerInterface {
     return typeof username === "string" && username.length > 0 && (/^[a-zA-Z0-9_-]+$/g).test(username);
   }
 }
+*/

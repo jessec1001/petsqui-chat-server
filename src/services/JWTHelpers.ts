@@ -1,3 +1,4 @@
+/*
 import { promisify } from "util";
 import { sign, verify } from "jsonwebtoken";
 import debug from "debug";
@@ -33,3 +34,4 @@ export async function toPayload(token: string): Promise<PayloadInterface|null> {
 
   return null;
 }
+*/

@@ -84,7 +84,7 @@ export default class PetsquiApi implements UsersProviderInterface {
       const response = await this.client.get<SearchResultsInterface>(
         `/api/v1/search/`,
         {
-          ...this.getDefaultOptions(socket.token),
+          ...this.getDefaultOptions(socket.options),
           queryParameters: {
             params: {
               q: query,
@@ -109,11 +109,12 @@ export default class PetsquiApi implements UsersProviderInterface {
     }
   }
 
-  private getDefaultOptions(token: string): IRequestOptions {
+  private getDefaultOptions(options: Record<string, any>): IRequestOptions {
+    console.log(`Token ${options.token}`);
     return {
       acceptHeader: "application/json, text/plain, */*",
       additionalHeaders: {
-        'Authorization': `Token ${token}`,
+        'Authorization': `Token ${options.token}`,
         'Accept-encoding': 'gzip, deflate, br',
         'Accept-language': 'en,ru;q=0.9,lt;q=0.8',
         'Content-Type': 'application/json;charset=UTF-8',
@@ -126,18 +127,19 @@ export default class PetsquiApi implements UsersProviderInterface {
     };
   }
 
-  async authenticate(token: string): Promise<UserResponse|null> {
+  async authenticate(options: Record<string, any>): Promise<UserResponse|null> {
     try {
       const response = await this.client.get<UserResponseInterface>(
         "/api/v1/users/me/",
-        this.getDefaultOptions(token),
+        this.getDefaultOptions(options),
       );
-
       return {
         id: response.result.uuid,
         username: response.result.username,
         avatar: response.result.avatar && response.result.avatar.url,
         color: response.result.color&& response.result.color.color,
+        public_key: options.public_key,
+        salt: options.salt,
       };
     } catch (err) {
       log(err);
@@ -154,7 +156,7 @@ export default class PetsquiApi implements UsersProviderInterface {
       const response = await this.client.get<FollowingsResponseInterface>(
         `/api/v1/users/${socket.userId}/followings/`,
         {
-          ...this.getDefaultOptions(socket.token),
+          ...this.getDefaultOptions(socket.options),
           queryParameters: {
             params: {
               limit: 10,

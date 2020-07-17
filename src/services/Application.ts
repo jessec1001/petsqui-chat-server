@@ -2,7 +2,7 @@ import * as express from "express";
 import * as bodyParser from "body-parser";
 import { createServer, Server } from 'http';
 import debug from "debug";
-import TokenController from "../controller/TokenController";
+//import TokenController from "../controller/TokenController";
 
 export default class Application {
   private static instance: Application;
