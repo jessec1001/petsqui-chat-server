@@ -5,7 +5,7 @@ import { Conversation, User, ChatEvent } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
 import { ConversationRepository, UserRepository, ChatEventRepository } from "../repository";
-import { Socket } from "../services/SocketIOServer";
+import SocketIOServer, { Socket } from "../services/SocketIOServer";
 
 const log = debug("application:conversation-handler");
 
@@ -14,15 +14,18 @@ export default class ConversationHandler {
   private conversationRepository: ConversationRepository;
   private eventsRepository: ChatEventRepository;
   private userRepository: UserRepository;
+  server: SocketIOServer;
 
   constructor(
     conversationRepository: ConversationRepository,
     userRepository: UserRepository,
-    eventsRepository: ChatEventRepository
+    eventsRepository: ChatEventRepository,
+    server: SocketIOServer
   ) {
     this.conversationRepository = conversationRepository;
     this.userRepository = userRepository;
     this.eventsRepository = eventsRepository;
+    this.server = server;
   }
 
   fetch = (socket: Socket) => async (fn: Function): Promise<void> => {
@@ -58,8 +61,9 @@ export default class ConversationHandler {
           conversation.addParticipant(u);
         });
         this.conversationRepository.save(conversation);
-
-        fn({ success: true, conversation: await conversation.toResponse(socket.userId) });
+        const conversationResponse = await conversation.toResponse(socket.userId);
+        this.server.emitToConversation(conversation, "conversations:created", { conversation: conversationResponse }, [socket.userId]);
+        fn({ success: true, conversation: conversationResponse });
       } else {
         throw new Error("Authentication failed!");
       }
@@ -110,7 +114,8 @@ export default class ConversationHandler {
       this.instance = new ConversationHandler(
         getCustomRepository(ConversationRepository),
         getCustomRepository(UserRepository),
-        getCustomRepository(ChatEventRepository)
+        getCustomRepository(ChatEventRepository),
+        SocketIOServer.getInstance()
       );
     }
 
