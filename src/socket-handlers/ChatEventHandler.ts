@@ -71,12 +71,12 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   };
 
   fetch = (socket: Socket) => (
-    async ({ conversationId, page = 1 }, fn: Function): Promise<void> => {
+    async ({ conversationId, skip = 0 }, fn: Function): Promise<void> => {
       try {
         const events = await this.eventRepository.find({
           where: { conversation: { id: conversationId } },
           take: 20,
-          skip: 20 * (page - 1),
+          skip: skip,
           order: { createdAt: "DESC" },
           loadEagerRelations: false,
           relations: ['owner']
