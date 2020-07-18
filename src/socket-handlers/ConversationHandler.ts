@@ -70,7 +70,7 @@ export default class ConversationHandler {
   };
 
   delete = (socket: Socket) => async (
-    { conversationId }: { conversationId: string }, fn: Function
+    { conversationId, hidden }: { conversationId: string, hidden: boolean }, fn: Function
   ): Promise<void> => {
     try {
       const conversation = await this.conversationRepository.findById(conversationId);
@@ -83,14 +83,15 @@ export default class ConversationHandler {
       if (!owner) {
         throw new Error("Invalid conversation.");
       }
-
-      const leftEvent = ChatEvent.createUserLeft(owner, conversation);
+      if (!hidden) {
+        const leftEvent = ChatEvent.createUserLeft(owner, conversation);
+        this.eventsRepository.save(leftEvent);
+      }
       const newParticipants = participants.filter(participant => participant.id != socket.userId);
       conversation.participants = new Promise((resolve) => resolve(newParticipants));
 
       this.conversationRepository.save(conversation);
-      this.eventsRepository.save(leftEvent);
-
+      
       return fn({ success: true });
     } catch (error) {
       log(error);
