@@ -33,12 +33,13 @@ export default class UserHandler implements SocketHandlerInterface {
         }
       }
       const user = User.createFromResponse(payload);
-      await this.userRepository.insertOrUpdate(user,overwriteKeys);
+      await this.userRepository.insertOrUpdate(user, overwriteKeys);
+      const savedUser = await this.userRepository.findByID(payload.id);
       socket.userId = payload.id;
       socket.user = payload;
       socket.options = options;
       this.server.addClient(payload.id, socket);
-      fn({ success: true, user: user.toResponse() });
+      fn({ success: true, user: savedUser.toResponse(true) });
     } catch (err) {
       log(err);
       fn({ success: false, error: "Authentication failed!" });

@@ -43,13 +43,13 @@ export default class User {
   @OneToMany(() => ChatEvent, event => event.owner)
   events: Promise<ChatEvent[]>;
 
-  toResponse(): UserResponse {
+  toResponse(include_salt=false): UserResponse {
     return {
       id: this.id,
       username: this.username,
       color: this.color,
       avatar: this.avatar,
-      salt: this.salt,
+      salt: include_salt ? this.salt : "",
       public_key: this.public_key,
     };
   }
