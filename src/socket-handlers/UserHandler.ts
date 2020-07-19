@@ -45,6 +45,17 @@ export default class UserHandler implements SocketHandlerInterface {
       fn({ success: false, error: "Authentication failed!" });
     }
   };
+  updateKey = (socket: Socket) => async ({ public_key }, fn: Function): Promise<void> => {
+    try {
+      const savedUser = await this.userRepository.findByID(socket.userId);
+      savedUser.public_key = public_key;
+      await this.userRepository.insertOrUpdate(savedUser, true);
+      fn({ success: true, user: savedUser.toResponse(true) });
+    } catch (err) {
+      log(err);
+      fn({ success: false, error: "Authentication failed!" });
+    }
+  };
 
   getFollowings = (socket: Socket) => async ({ page = 1 }, fn: Function): Promise<void> => {
     try {
@@ -85,6 +96,7 @@ export default class UserHandler implements SocketHandlerInterface {
     socket.on("users:authenticate", this.authenticate(socket));
     socket.on("users:get_followings", this.getFollowings(socket));
     socket.on("users:search", this.search(socket));
+    socket.on("users:updateKey", this.updateKey(socket));
   }
 
   public static getInstance(): UserHandler {
