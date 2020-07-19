@@ -73,6 +73,7 @@ export default class Conversation {
 
     return {
       id: this.id,
+      time: this.createdAt,
       name: await this.getNameFor(current, participants),
       lastEvent: this.lastEvent && this.lastEvent.toResponse(),
       participants: participants.map(p => p.toResponse()),
@@ -83,6 +84,7 @@ export default class Conversation {
 export interface ConversationResponse {
   id: string;
   name: string;
+  time: Date;
   lastEvent: ChatEventResponse;
   participants: UserResponse[];
 }
