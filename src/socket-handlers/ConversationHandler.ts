@@ -1,6 +1,6 @@
 import debug from "debug";
 
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, getConnection } from "typeorm";
 import { Conversation, User, ChatEvent } from "../entity";
 import { ConversationResponse } from "../entity/Conversation";
 import { UserResponse } from "../entity/User";
@@ -60,10 +60,12 @@ export default class ConversationHandler {
         users.forEach(u => {
           conversation.addParticipant(u);
         });
-        this.conversationRepository.save(conversation);
-        const conversationResponse = await conversation.toResponse(socket.userId);
-        this.server.emitToConversation(conversation, "conversations:created", { conversation: conversationResponse }, [socket.userId]);
-        fn({ success: true, conversation: conversationResponse });
+        getConnection().transaction(async entityManager => {
+          await entityManager.getCustomRepository(ConversationRepository).save(conversation);
+          const conversationResponse = await conversation.toResponse(socket.userId);
+          this.server.emitToConversation(conversation, "conversations:created", { conversation: conversationResponse }, [socket.userId]);
+          fn({ success: true, conversation: conversationResponse });
+        });    
       } else {
         throw new Error("Authentication failed!");
       }
