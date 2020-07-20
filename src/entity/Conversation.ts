@@ -1,4 +1,4 @@
-import { Entity, PrimaryColumn, ManyToMany, JoinTable, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
 import { v4 } from "uuid";
 import User, { UserResponse } from "./User";
 import ChatEvent, { ChatEventResponse } from "./ChatEvent";
@@ -18,6 +18,21 @@ export default class Conversation {
 
   @OneToMany(() => ChatEvent, event => event.conversation)
   events: Promise<ChatEvent[]>;
+
+  @Column("longtext")
+  name: string;
+
+  @Column()
+  avatar: string;
+
+  @Column("longtext")
+  publicName: string;
+
+  @Column()
+  publicAvatar: string;
+
+  @Column()
+  publicKey: string;
 
   @UpdateDateColumn()
   updatedAt: Date;
@@ -75,6 +90,11 @@ export default class Conversation {
       id: this.id,
       time: this.createdAt,
       name: await this.getNameFor(current, participants),
+      groupName: this.name,
+      publicName: this.publicName,
+      key: this.publicKey,
+      avatar: this.avatar,
+      publicAvatar: this.publicAvatar,
       lastEvent: this.lastEvent && this.lastEvent.toResponse(),
       participants: participants.map(p => p.toResponse()),
     };
@@ -84,6 +104,11 @@ export default class Conversation {
 export interface ConversationResponse {
   id: string;
   name: string;
+  groupName: string;
+  publicName: string;
+  key: string;
+  avatar: string;
+  publicAvatar: string;
   time: Date;
   lastEvent: ChatEventResponse;
   participants: UserResponse[];

@@ -4,6 +4,7 @@ import {
 import { v4 } from "uuid";
 import Conversation from "./Conversation";
 import ChatEvent from "./ChatEvent";
+import UserDevice from "./UserDevice";
 
 @Entity()
 export default class User {
@@ -42,6 +43,9 @@ export default class User {
 
   @OneToMany(() => ChatEvent, event => event.owner)
   events: Promise<ChatEvent[]>;
+
+  @OneToMany(() => UserDevice, device => device.owner)
+  devices: Promise<UserDevice[]>;
 
   toResponse(include_salt=false): UserResponse {
     return {
