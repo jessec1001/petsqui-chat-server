@@ -22,13 +22,13 @@ export default class ConversationRepository extends Repository<Conversation> {
     return masterConversation;
   }
 
-  async getConversations(id: string, page = 1, take = 100): Promise<Conversation[]> {
+  async getConversations(id: string, skip = 0, take = 999999): Promise<Conversation[]> {
     return this.createQueryBuilder("conversation")
       .leftJoin("conversation.participants", "participants")
       .leftJoinAndMapOne("conversation.lastEvent", "conversation.events", "lastEvent")
       .where("participants.id = :id", { id })
-      .take(20)
-      .skip((page - 1) * take)
+      .take(take)
+      .skip(skip)
       .orderBy("conversation.updatedAt", "DESC")
       .getMany();
   }

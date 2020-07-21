@@ -110,7 +110,6 @@ export default class PetsquiApi implements UsersProviderInterface {
   }
 
   private getDefaultOptions(options: Record<string, any>): IRequestOptions {
-    console.log(`Token ${options.token}`);
     return {
       acceptHeader: "application/json, text/plain, */*",
       additionalHeaders: {
