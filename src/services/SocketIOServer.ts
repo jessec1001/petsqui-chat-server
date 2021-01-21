@@ -1,4 +1,4 @@
-import IO = require("socket.io");
+import { Socket as IOSocket, Server } from "socket.io";
 import debug from "debug";
 import Application from "./Application";
 import { Conversation } from "../entity";
@@ -7,7 +7,7 @@ import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-ha
 
 const log = debug("application:socket-server");
 
-export interface Socket extends IO.Socket {
+export interface Socket extends IOSocket {
   userId: string|null;
   user: UserResponse;
   options: Record<string,any>|null;
@@ -15,11 +15,11 @@ export interface Socket extends IO.Socket {
 
 export default class SocketIOServer {
   private static instance: SocketIOServer;
-  private io: IO.Server;
+  private io: Server;
   private clients: Map<string, Set<Socket>>;
 
   private constructor(application: Application) {
-    this.io = IO(application.getServer(), {
+    this.io = new Server(application.getServer(), {
       serveClient: false,
       path: '/io',
     });
@@ -64,7 +64,7 @@ export default class SocketIOServer {
     participants.filter(p => skip.indexOf(p.id) < 0).forEach(p => {
       const clients = this.getClients(p.id);
       clients.forEach(client => {
-        client.json.emit(event, payload);
+        client.emit(event, payload);
       });
     });
   }
@@ -76,7 +76,7 @@ export default class SocketIOServer {
   ): void {
     const clients = this.getClients(id);
     clients.forEach(client => {
-      client.json.emit(event, payload);
+      client.emit(event, payload);
     });
   }
 

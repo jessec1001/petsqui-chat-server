@@ -3,13 +3,14 @@ FROM node:current-alpine
 RUN apk add --no-cache --virtual .gyp \
         python \
         make \
-        g++
+        g++ \
+        yarn
 
 WORKDIR /server
 
 COPY . /server
-RUN npm install
-RUN npm run build
+RUN yarn install
+RUN yarn run build
 
 EXPOSE 3000
-CMD [ "npm", "run", "start" ]
+CMD [ "yarn", "run", "start" ]
