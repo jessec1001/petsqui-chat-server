@@ -28,19 +28,18 @@ export default class SocketIOServer {
   }
 
   public addClient(id: string, socket: Socket): void {
-    log("add client", id, socket.userId);
+    id = String(id);
     this.deleteClient(socket);
     if (!this.clients.has(id)) {
       this.clients.set(id, new Set());
     }
-
+    
     this.clients.get(id).add(socket);
   }
 
   public getClients(id: string): Set<Socket> {
-    //log("get clients", id);
+    id = String(id);
     if (this.clients.has(id)) {
-      //log("got clients", id);
       return this.clients.get(id);
     }
 

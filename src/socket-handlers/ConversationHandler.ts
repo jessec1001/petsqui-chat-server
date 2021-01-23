@@ -70,7 +70,7 @@ export default class ConversationHandler {
         throw new Error("Authentication failed!");
       }
     } catch (err) {
-      log(err);
+      log("ERROR", err);
       fn({ success: false, error: err });
     }
   };
@@ -85,7 +85,7 @@ export default class ConversationHandler {
       }
 
       const participants = await conversation.participants;
-      const owner = participants.find(participant => participant.id === socket.userId);
+      const owner = participants.find(participant => participant.id == socket.userId);
       if (!owner) {
         throw new Error("Invalid conversation.");
       }
