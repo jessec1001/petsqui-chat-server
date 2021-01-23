@@ -1,4 +1,5 @@
 import { Repository, EntityRepository, InsertResult } from "typeorm";
+import { UserSingleUseToken } from "../entity";
 import User from "../entity/User";
 
 @EntityRepository(User)
@@ -25,6 +26,12 @@ export default class UserRepository extends Repository<User> {
       ])
       .getMany();
   }
+  async addTokens(userId: string, tokens: UserSingleUseToken[]): Promise<void> {
+    return this.createQueryBuilder("user")
+      .relation(User, "tokens")
+      .of(userId)
+      .add(tokens);
+  }
   async bulkInsertOrUpdate(users: User[]): Promise<InsertResult> {
     return await this.createQueryBuilder()
       .insert()
@@ -43,7 +50,7 @@ export default class UserRepository extends Repository<User> {
     if (!overwriteKeys) {
       overwrite = ["username", "avatar", "color"];
     } else {
-      overwrite = ["username", "avatar", "color", "public_key", "salt"]
+      overwrite = ["username", "avatar", "color", "public_key", "salt"];
     }
     return await this.createQueryBuilder()
       .insert()

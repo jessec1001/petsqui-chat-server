@@ -5,7 +5,7 @@ import { v4 } from "uuid";
 import Conversation from "./Conversation";
 import ChatEvent from "./ChatEvent";
 import UserDevice from "./UserDevice";
-
+import UserSingleUseToken from "./UserSingleUseToken";
 @Entity()
 export default class User {
   constructor(username: string) {
@@ -47,13 +47,15 @@ export default class User {
   @OneToMany(() => UserDevice, device => device.owner)
   devices: Promise<UserDevice[]>;
 
+  @OneToMany(() => UserSingleUseToken, token => token.owner)
+  tokens: Promise<UserSingleUseToken[]>;
+
   toResponse(include_salt=false): UserResponse {
     return {
       id: this.id,
       username: this.username,
       color: this.color,
       avatar: this.avatar,
-      salt: include_salt ? this.salt : "",
       public_key: this.public_key,
     };
   }
@@ -67,8 +69,6 @@ export default class User {
 
   updateFromResponse(userResponse: UserResponse): void {
     this.username = userResponse.username;
-    this.salt = userResponse.salt;
-    this.public_key = userResponse.public_key;
     if (userResponse.avatar) {
       this.avatar = userResponse.avatar;
     }
@@ -85,5 +85,4 @@ export interface UserResponse {
   color?: string;
   avatar?: string;
   public_key ?: string;
-  salt ?: string;
 }

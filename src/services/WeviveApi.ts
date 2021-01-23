@@ -8,7 +8,7 @@ import { Socket } from "./SocketIOServer";
 const log = debug("application:petsqui-api");
 
 export interface UserResponseInterface {
-  id: number;
+  id: string;
   url: string;
   uuid: string;
   username: string;
@@ -60,14 +60,14 @@ interface SearchResultsInterface {
   };
 }
 
-export default class PetsquiApi implements UsersProviderInterface {
-  private static instance: PetsquiApi;
+export default class WeviveApi implements UsersProviderInterface {
+  private static instance: WeviveApi;
   client: RestClient;
 
   constructor(client?: RestClient) {
     if (!client) {
       log(process.env.API_BASE_URL);
-      client = new RestClient("Petsqui-Chat", process.env.API_BASE_URL, null, {
+      client = new RestClient("Wevive-Chat", process.env.API_BASE_URL, null, {
         allowRedirectDowngrade: true,
       });
     }
@@ -113,12 +113,10 @@ export default class PetsquiApi implements UsersProviderInterface {
     return {
       acceptHeader: "application/json, text/plain, */*",
       additionalHeaders: {
-        'Authorization': `Token ${options.token}`,
+        'Authorization': `Bearer ${options.token}`,
         'Accept-encoding': 'gzip, deflate, br',
-        'Accept-language': 'en,ru;q=0.9,lt;q=0.8',
+        'Accept-language': 'en',
         'Content-Type': 'application/json;charset=UTF-8',
-        'Origin': 'https://www.petsqui.com/',
-        'Referer': 'https://www.petsqui.com/auth',
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
@@ -129,15 +127,14 @@ export default class PetsquiApi implements UsersProviderInterface {
   async authenticate(options: Record<string, any>): Promise<UserResponse|null> {
     try {
       const response = await this.client.get<UserResponseInterface>(
-        "/api/v1/users/me/",
+        "/api/users/me/",
         this.getDefaultOptions(options),
       );
       return {
-        id: response.result.uuid,
+        id: response.result.id,
         username: response.result.username,
         avatar: response.result.avatar && response.result.avatar.url,
         color: response.result.color&& response.result.color.color,
-        public_key: options.public_key,
       };
     } catch (err) {
       log(err);
@@ -182,9 +179,9 @@ export default class PetsquiApi implements UsersProviderInterface {
     }
   }
 
-  public static getInstance(): PetsquiApi {
+  public static getInstance(): WeviveApi {
     if (!this.instance) {
-      this.instance = new PetsquiApi();
+      this.instance = new WeviveApi();
     }
 
     return this.instance;

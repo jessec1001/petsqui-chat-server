@@ -6,7 +6,7 @@ import { UserRepository } from "../repository";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
 import SocketIOServer, { Socket } from "../services/SocketIOServer";
 import { SocketHandlerInterface } from ".";
-import PetsquiApi from "../services/PetsquiApi";
+import usersProvider from "../services/UserProvider";
 
 const log = debug("application:user-handler");
 
@@ -34,76 +34,28 @@ export default class UserHandler implements SocketHandlerInterface {
       }
       const user = User.createFromResponse(payload);
       await this.userRepository.insertOrUpdate(user, overwriteKeys);
+      //FIXME: do we need this second query?
       const savedUser = await this.userRepository.findByID(payload.id);
       socket.userId = payload.id;
       socket.user = payload;
       socket.options = options;
       this.server.addClient(payload.id, socket);
-      fn({ success: true, user: savedUser.toResponse(true) });
+      fn({ success: true, user: savedUser.toResponse() });
     } catch (err) {
       log(err);
       fn({ success: false, error: "Authentication failed!" });
-    }
-  };
-  updateKey = (socket: Socket) => async ({ public_key }, fn: Function): Promise<void> => {
-    try {
-      const savedUser = await this.userRepository.findByID(socket.userId);
-      savedUser.public_key = public_key;
-      await this.userRepository.insertOrUpdate(savedUser, true);
-      fn({ success: true, user: savedUser.toResponse(true) });
-    } catch (err) {
-      log(err);
-      fn({ success: false, error: "Authentication failed!" });
-    }
-  };
-
-  getFollowings = (socket: Socket) => async ({ page = 1 }, fn: Function): Promise<void> => {
-    try {
-      const followings = await this.usersProvider.getFollowings(socket, page);
-      const keys = await this.userRepository.bulkSelectKeys(followings.map(p=>p.id));
-      const keysMap  = {};
-      keys.map(k=>{
-        keysMap[k.id] = k.public_key;
-      });
-      const followingsWithKeys = followings.map(p => {
-        if (keysMap[p.id]) {
-          p.public_key = keysMap[p.id];
-        } else {
-          p.public_key = "";
-        }
-        return p;
-      });
-      //const users = followings.map(p => User.createFromResponse(p));
-      //this.userRepository.bulkInsertOrUpdate(users);
-      fn({ success: true, followings: followingsWithKeys });
-    } catch (err) {
-      log(err);
-      fn({ success: false, followings: [] });
-    }
-  };
-
-  search = (socket: Socket) => async ({query, page = 1}, fn: Function): Promise<void> => {
-    try {
-      const results = await this.usersProvider.getSearchResults(socket, query, page);
-      fn({ success: true, results });
-    } catch (err) {
-      log(err);
-      fn({ success: false, results: [] });
     }
   };
 
   handle(socket: Socket): void {
     socket.on("users:authenticate", this.authenticate(socket));
-    socket.on("users:get_followings", this.getFollowings(socket));
-    socket.on("users:search", this.search(socket));
-    socket.on("users:updateKey", this.updateKey(socket));
   }
 
   public static getInstance(): UserHandler {
     if (!this.instance) {
       this.instance = new UserHandler(
         SocketIOServer.getInstance(),
-        PetsquiApi.getInstance(),
+        usersProvider.getInstance(),
         getCustomRepository(UserRepository)
       );
     }
