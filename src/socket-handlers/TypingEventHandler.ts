@@ -23,8 +23,8 @@ export default class TypingEventHandler implements SocketHandlerInterface {
     this.server = server;
   }
 
-  newMessage = (socket: Socket) => async (
-    { conversationId, message },
+  typingEvent = (socket: Socket) => async (
+    { conversationId },
     fn: Function
   ): Promise<void> => {
 
@@ -42,7 +42,7 @@ export default class TypingEventHandler implements SocketHandlerInterface {
       }
 
       // send to all participants.
-      this.server.emitToConversation(conversation, "events:typing", { userId: socket.userId });
+      this.server.emitToConversation(conversation, "events:typing", { userId: socket.userId }, [socket.userId]);
 
       // notify the user.
       if (fn) {
@@ -57,7 +57,7 @@ export default class TypingEventHandler implements SocketHandlerInterface {
 
 
   handle(socket: Socket): void {
-    socket.on("events:typing", this.newMessage(socket));
+    socket.on("events:typing", this.typingEvent(socket));
   }
 
   static getInstance(): TypingEventHandler {
