@@ -3,7 +3,7 @@ import debug from "debug";
 import Application from "./Application";
 import { Conversation } from "../entity";
 import { UserResponse } from "../entity/User";
-import { ConversationHandler, ChatEventHandler, UserHandler } from "../socket-handlers";
+import { ConversationHandler, ChatEventHandler, UserHandler, TypingEventHandler } from "../socket-handlers";
 
 const log = debug("application:socket-server");
 
@@ -85,7 +85,7 @@ export default class SocketIOServer {
       UserHandler.getInstance().handle(socket);
       ChatEventHandler.getInstance().handle(socket);
       ConversationHandler.getInstance().handle(socket);
-
+      TypingEventHandler.getInstance().handle(socket);
       socket.on("disconnect", () => {
         this.deleteClient(socket);
       });
@@ -96,7 +96,6 @@ export default class SocketIOServer {
           socket.emit("users:require_authentication", { event: packet[0], payload: packet[1] });
           return next(new Error("Authentication failed."));
         }
-
         next();
       });
     });
