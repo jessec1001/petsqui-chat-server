@@ -50,7 +50,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .getMany();
 
     return conversations.map(c => {
-      const event = events.find(e => e.conversation.id === c.id);
+      const event = events.find(e => e.conversation.id == c.id);
       if (event) {
         c.lastEvent = event;
       }

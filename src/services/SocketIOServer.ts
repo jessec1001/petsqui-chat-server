@@ -3,7 +3,7 @@ import debug from "debug";
 import Application from "./Application";
 import { Conversation } from "../entity";
 import { UserResponse } from "../entity/User";
-import { ConversationHandler, ChatEventHandler, UserHandler, TypingEventHandler } from "../socket-handlers";
+import { ConversationHandler, ChatEventHandler, UserHandler, TypingEventHandler, SocialHandler, CryptographyHandler } from "../socket-handlers";
 
 const log = debug("application:socket-server");
 
@@ -85,6 +85,8 @@ export default class SocketIOServer {
       ChatEventHandler.getInstance().handle(socket);
       ConversationHandler.getInstance().handle(socket);
       TypingEventHandler.getInstance().handle(socket);
+      SocialHandler.getInstance().handle(socket);
+      CryptographyHandler.getInstance().handle(socket);
       socket.on("disconnect", () => {
         this.deleteClient(socket);
       });

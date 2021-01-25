@@ -56,10 +56,8 @@ export default class ConversationHandler {
         const conversation = new Conversation();
         participants.push(socket.user);
         const users = participants.map(p => User.createFromResponse(p));
-        this.userRepository.bulkInsertOrUpdate(users);
-        users.forEach(u => {
-          conversation.addParticipant(u);
-        });
+        await this.userRepository.bulkInsertOrUpdate(users);
+        conversation.addParticipants(users);
         getConnection().transaction(async entityManager => {
           await entityManager.getCustomRepository(ConversationRepository).save(conversation);
           const conversationResponse = await conversation.toResponse(socket.userId);

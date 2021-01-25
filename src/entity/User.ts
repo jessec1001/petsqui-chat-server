@@ -10,7 +10,7 @@ import UserSingleUseToken from "./UserSingleUseToken";
 export default class User {
   constructor(username: string) {
     this.id = v4();
-    this.username = username;
+    this.username = String(username);
   }
 
   @PrimaryColumn("varchar", { length: 36 })
@@ -20,13 +20,13 @@ export default class User {
   @Column()
   username: string;
 
-  @Column()
+  @Column({ nullable: true })
   avatar: string;
 
-  @Column()
+  @Column({ nullable: true })
   salt: string;
 
-  @Column()
+  @Column({ nullable: true })
   public_key: string;
 
   @Column({ nullable: true })
@@ -57,12 +57,13 @@ export default class User {
       color: this.color,
       avatar: this.avatar,
       public_key: this.public_key,
+      salt: "SALT",
     };
   }
 
   static createFromResponse(userResponse: UserResponse): User {
-    const user = new User(userResponse.username);
-    user.id = userResponse.id;
+    const user = new User(userResponse.id);
+    user.id = String(userResponse.id);
     user.updateFromResponse(userResponse);
     return user;
   }
@@ -85,4 +86,5 @@ export interface UserResponse {
   color?: string;
   avatar?: string;
   public_key ?: string;
+  salt ?: string;
 }

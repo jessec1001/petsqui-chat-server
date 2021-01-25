@@ -1,8 +1,9 @@
 import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
 import { v4 } from "uuid";
+import debug from "debug";
 import User, { UserResponse } from "./User";
 import ChatEvent, { ChatEventResponse } from "./ChatEvent";
-
+const log = debug("application:conversation-entity");
 @Entity()
 export default class Conversation {
   constructor() {
@@ -19,19 +20,19 @@ export default class Conversation {
   @OneToMany(() => ChatEvent, event => event.conversation)
   events: Promise<ChatEvent[]>;
 
-  @Column("longtext")
+  @Column("longtext", {nullable: true})
   name: string;
 
-  @Column()
+  @Column({nullable: true})
   avatar: string;
 
-  @Column("longtext")
+  @Column("longtext", {nullable: true})
   publicName: string;
 
-  @Column()
+  @Column({nullable: true})
   publicAvatar: string;
 
-  @Column()
+  @Column({nullable: true})
   publicKey: string;
 
   @UpdateDateColumn()
@@ -58,6 +59,18 @@ export default class Conversation {
     }
   }
 
+  async addParticipants(users: User[]): Promise<void> {
+    let participants = await this.participants;
+    if (!participants) {
+      participants = [];
+    }
+    users.forEach((user) => {
+      if (!participants.some(p => p.id === user.id)) {
+        participants.push(user);
+      }
+    });
+  }
+
   async getNameFor(owner: User, participants: User[] = null): Promise<string> {
     if (this.id === "master") {
       return "All Users";
@@ -81,11 +94,10 @@ export default class Conversation {
 
   async toResponse(loggedInId: string): Promise<ConversationResponse|null> {
     const participants = await this.participants;
-    const current = participants.filter(p => p.id === loggedInId).pop();
+    const current = participants.filter(p => p.id == loggedInId).pop();
     if (!current) {
       return null;
     }
-
     return {
       id: this.id,
       time: this.createdAt,

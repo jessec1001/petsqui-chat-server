@@ -5,38 +5,12 @@ import { ObjectLiteral } from "typeorm";
 import { UserResponse } from "../entity/User";
 import UsersProviderInterface from "../interfaces/UsersProviderInterface";
 import { Socket } from "./SocketIOServer";
-const log = debug("application:petsqui-api");
+const log = debug("application:wevive-api");
 
 export interface UserResponseInterface {
   id: string;
-  url: string;
-  uuid: string;
-  username: string;
-  date_joined: string;
-  last_login: string;
-  verified: boolean;
-
-  avatar: Partial<{
-      id: number;
-      url: string;
-      thumbnail: null;
-      parent: null;
-      owner: number;
-      extra_kwargs: string;
-      created: string;
-      title: string;
-      descrip: string;
-      media_type: string;
-      locale: string;
-      site_name: string;
-      thumbnails: string;
-  }>;
-
-  color: Partial<{
-      id: number;
-      name: string;
-      color: string;
-  }>;
+  email: string;
+  public_key: string;
 }
 
 interface ApiResponseInterface {
@@ -46,18 +20,11 @@ interface ApiResponseInterface {
 }
 
 interface FollowingsResponseInterface extends ApiResponseInterface {
-  results: Array<{
-    following_user: UserResponseInterface;
-    following_pet: ObjectLiteral;
-  }>;
+  results: UserResponseInterface[];
 }
 
 interface SearchResultsInterface {
-  user: {
-    results: UserResponseInterface[];
-    next: string;
-    previous: string;
-  };
+  results: UserResponseInterface[];
 }
 
 export default class WeviveApi implements UsersProviderInterface {
@@ -82,25 +49,24 @@ export default class WeviveApi implements UsersProviderInterface {
       }
 
       const response = await this.client.get<SearchResultsInterface>(
-        `/api/v1/search/`,
+        `/api/users/search/`,
         {
           ...this.getDefaultOptions(socket.options),
           queryParameters: {
             params: {
               q: query,
-              limit: 10,
-              offset: (page - 1) * 10
+              page
             },
           },
         },
       );
 
-      return response.result.user.results.map(user => {
+      return response.result.results.map(user => {
         return {
-          id: user.uuid,
-          username: user.username,
-          avatar: user.avatar && user.avatar.url,
-          color: user.color && user.color.color,
+          id: user.id,
+          username: user.email,
+          //avatar: user.avatar && user.avatar.url,
+          //color: user.color && user.color.color,
         };
       });
     } catch (err) {
@@ -126,18 +92,20 @@ export default class WeviveApi implements UsersProviderInterface {
 
   async authenticate(options: Record<string, any>): Promise<UserResponse|null> {
     try {
-      const response = await this.client.get<UserResponseInterface>(
+      const response = await this.client.get(
         "/api/users/me/",
         this.getDefaultOptions(options),
       );
+      const parsedResponse = <UserResponseInterface>response.result;
       return {
-        id: response.result.id,
-        username: response.result.username,
-        avatar: response.result.avatar && response.result.avatar.url,
-        color: response.result.color&& response.result.color.color,
+        id: parsedResponse.id,
+        username: parsedResponse.email,
+        //avatar: parsedResponse.avatar && parsedResponse.avatar.url,
+        //color: parsedResponse.color && parsedResponse.color.color,
+        public_key: options.public_key,
       };
     } catch (err) {
-      log(err);
+      log("ERROR",  err);
       return null;
     }
   }
@@ -146,31 +114,27 @@ export default class WeviveApi implements UsersProviderInterface {
     if (!page || page < 1) {
       page = 1;
     }
-
     try {
       const response = await this.client.get<FollowingsResponseInterface>(
-        `/api/v1/users/${socket.userId}/followings/`,
+        //`/api/v1/users/${socket.userId}/followings/`,
+        `/api/users/search/`,
         {
           ...this.getDefaultOptions(socket.options),
           queryParameters: {
             params: {
-              limit: 10,
-              offset: (page - 1) * 10,
+              page
             }
           }
         },
       );
-
       return response.result.results.filter(result => {
-        return result && result.following_user && result.following_user.username;
+        return result && result.email;
       }).map(result => {
-        const user = result.following_user;
-
         return {
-          id: user.uuid,
-          username: user.username,
-          avatar: user.avatar && user.avatar.url,
-          color: user.color && user.color.color,
+          id: result.id,
+          username: result.email,
+          //avatar: user.avatar && user.avatar.url,
+          //color: user.color && user.color.color,
         };
       });
     } catch (err) {

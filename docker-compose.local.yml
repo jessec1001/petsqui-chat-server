@@ -35,3 +35,6 @@ services:
       TYPEORM_DATABASE: "test"
       TYPEORM_PORT: 3306
       TYPEORM_SYNCHRONIZE: 1
+      NODE_DEBUG: "http"
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+

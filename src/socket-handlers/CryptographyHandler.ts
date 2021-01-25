@@ -26,7 +26,7 @@ export default class CryptographyHandler implements SocketHandlerInterface {
       fn({ success: true, user: savedUser.toResponse(true) });
     } catch (err) {
       log(err);
-      fn({ success: false, error: "Authentication failed!" });
+      fn({ success: false, error: "updateKey Authentication failed!" });
     }
   };
   addOTKs = (socket: Socket) => async ({ tokens }: {tokens: Array<string>}, fn: Function): Promise<void> => {
@@ -39,7 +39,7 @@ export default class CryptographyHandler implements SocketHandlerInterface {
       fn({ success: true });
     } catch (err) {
       log(err);
-      fn({ success: false, error: "Authentication failed!" });
+      fn({ success: false, error: "addOTKs Authentication failed!" });
     }
   };
   removeOTKs = (socket: Socket) => async ({ tokens }: {tokens: Array<string>}, fn: Function): Promise<void> => {
@@ -52,7 +52,7 @@ export default class CryptographyHandler implements SocketHandlerInterface {
       fn({ success: true });
     } catch (err) {
       log(err);
-      fn({ success: false, error: "Authentication failed!" });
+      fn({ success: false, error: "removeOTKs Authentication failed!" });
     }
   };
 

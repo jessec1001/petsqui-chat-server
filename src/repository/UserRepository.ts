@@ -1,6 +1,9 @@
 import { Repository, EntityRepository, InsertResult } from "typeorm";
 import { UserSingleUseToken } from "../entity";
 import User from "../entity/User";
+import debug from "debug";
+
+const log = debug('application:userrepository');
 
 @EntityRepository(User)
 export default class UserRepository extends Repository<User> {
@@ -32,17 +35,8 @@ export default class UserRepository extends Repository<User> {
       .of(userId)
       .add(tokens);
   }
-  async bulkInsertOrUpdate(users: User[]): Promise<InsertResult> {
-    return await this.createQueryBuilder()
-      .insert()
-      .orUpdate({
-        overwrite: ["username", "avatar", "color"],
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        conflict_target: "id",
-      })
-      .into(User)
-      .values(users)
-      .execute();
+  async bulkInsertOrUpdate(users: User[]): Promise<User[]> {
+    return await this.save(users);
   }
 
   async insertOrUpdate(user: User, overwriteKeys: boolean): Promise<InsertResult> {
