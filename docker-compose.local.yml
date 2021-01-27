@@ -15,10 +15,16 @@ services:
       MYSQL_PASSWORD: "test"
       MYSQL_DATABASE: "test"
 
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+
   web:
     build: .
     depends_on:
         - mariadb
+        - redis
     command: npm run debug
     ports:
       - "0.0.0.0:3000:3000"
@@ -28,6 +34,8 @@ services:
     volumes:
       - ./build:/server/build
     environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
       TYPEORM_CONNECTION: "mariadb"
       TYPEORM_HOST: mariadb
       TYPEORM_USERNAME: "test"

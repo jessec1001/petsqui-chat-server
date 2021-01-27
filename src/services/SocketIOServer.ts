@@ -4,6 +4,8 @@ import Application from "./Application";
 import { Conversation } from "../entity";
 import { UserResponse } from "../entity/User";
 import { ConversationHandler, ChatEventHandler, UserHandler, TypingEventHandler, SocialHandler, CryptographyHandler } from "../socket-handlers";
+import { createAdapter } from 'socket.io-redis';
+import { RedisClient } from 'redis';
 
 const log = debug("application:socket-server");
 
@@ -23,6 +25,10 @@ export default class SocketIOServer {
       serveClient: false,
       path: '/io',
     });
+    const pubClient = new RedisClient({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
+    const subClient = pubClient.duplicate();
+
+    this.io.adapter(createAdapter({ pubClient, subClient }));
     this.clients = new Map();
     this.setup();
   }
