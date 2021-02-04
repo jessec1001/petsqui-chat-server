@@ -5,7 +5,7 @@ import { Conversation } from "../entity";
 import { UserResponse } from "../entity/User";
 import { ConversationHandler, ChatEventHandler, UserHandler, TypingEventHandler, SocialHandler, CryptographyHandler } from "../socket-handlers";
 import { createAdapter } from 'socket.io-redis';
-import { RedisClient } from 'redis';
+import redis from 'redis';
 
 const log = debug("application:socket-server");
 
@@ -25,10 +25,17 @@ export default class SocketIOServer {
       serveClient: false,
       path: '/io',
     });
-    const pubClient = new RedisClient({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
-    const subClient = pubClient.duplicate();
 
-    this.io.adapter(createAdapter({ pubClient, subClient }));
+    if (process.env.REDIS_HOST !== 'localhost') {
+      const connectionString = "rediss://"+process.env.REDIS_USER+":"+process.env.REDIS_PASSWORD+"@"+process.env.REDIS_HOST+":"+process.env.REDIS_PORT;
+      const pubClient = redis.createClient(connectionString, { tls: { servername: new URL(connectionString).hostname } });
+      const subClient = redis.createClient(connectionString, { tls: { servername: new URL(connectionString).hostname } });
+      this.io.adapter(createAdapter({ pubClient, subClient }));
+    } else {
+      const pubClient = redis.createClient({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
+      const subClient = pubClient.duplicate();
+      this.io.adapter(createAdapter({ pubClient, subClient }));
+    }
     this.clients = new Map();
     this.setup();
   }
