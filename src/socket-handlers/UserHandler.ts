@@ -25,22 +25,26 @@ export default class UserHandler implements SocketHandlerInterface {
   authenticate = (socket: Socket) => async (options: Array<string | number>, fn: Function): Promise<void> => {
     try {
       const payload = await this.usersProvider.authenticate(options);
-      const userExists = await this.userRepository.findByID(payload.id);
-      let overwriteKeys = false;
-      if (userExists) {
-        if (!userExists.public_key) {
-          overwriteKeys = true;
+      if (!payload) {
+        fn({ success: false, error: "Authentication failed!" });
+      } else {
+        const userExists = await this.userRepository.findByID(payload.id);
+        let overwriteKeys = false;
+        if (userExists) {
+          if (!userExists.public_key) {
+            overwriteKeys = true;
+          }
         }
+        const user = User.createFromResponse(payload);
+        await this.userRepository.insertOrUpdate(user, overwriteKeys);
+        //FIXME: do we need this second query?
+        const savedUser = await this.userRepository.findByID(payload.id);
+        socket.userId = payload.id;
+        socket.user = payload;
+        socket.options = options;
+        this.server.addClient(payload.id, socket);
+        fn({ success: true, user: savedUser.toResponse() });
       }
-      const user = User.createFromResponse(payload);
-      await this.userRepository.insertOrUpdate(user, overwriteKeys);
-      //FIXME: do we need this second query?
-      const savedUser = await this.userRepository.findByID(payload.id);
-      socket.userId = payload.id;
-      socket.user = payload;
-      socket.options = options;
-      this.server.addClient(payload.id, socket);
-      fn({ success: true, user: savedUser.toResponse() });
     } catch (err) {
       log(err);
       fn({ success: false, error: "Authentication failed!" });
