@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable, OneToMany, UpdateDateColumn, CreateDateColumn } from "typeorm";
+import { Entity, Column, PrimaryColumn, ManyToMany, JoinTable, OneToMany, UpdateDateColumn, CreateDateColumn, Index } from "typeorm";
 import { v4 } from "uuid";
 import debug from "debug";
 import User, { UserResponse } from "./User";
@@ -20,13 +20,13 @@ export default class Conversation {
   @OneToMany(() => ChatEvent, event => event.conversation)
   events: Promise<ChatEvent[]>;
 
-  @Column("longtext", {nullable: true})
+  @Column("text", {nullable: true})
   name: string;
 
   @Column({nullable: true})
   avatar: string;
 
-  @Column("longtext", {nullable: true})
+  @Column("text", {nullable: true})
   publicName: string;
 
   @Column({nullable: true})

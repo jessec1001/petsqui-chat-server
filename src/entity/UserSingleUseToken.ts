@@ -16,7 +16,7 @@ export default class UserSingleUseToken {
     @JoinColumn()
     owner: User;
 
-    @Column("longtext")
+    @Column("text")
     token: string;
   
     @UpdateDateColumn()

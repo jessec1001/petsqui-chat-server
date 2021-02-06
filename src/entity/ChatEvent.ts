@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable } from "typeorm";
+import { Entity, ManyToOne, PrimaryColumn, Column, UpdateDateColumn, CreateDateColumn, JoinColumn, ManyToMany, JoinTable, Index } from "typeorm";
 import { v4 } from "uuid";
 
 import { UserResponse } from "./User";
@@ -39,11 +39,12 @@ export default class ChatEvent {
     }
   })
   private reads: Promise<User[]>;
-
+  
+  @Index()
   @ManyToOne(() => Conversation, conversation => conversation.events, { cascade: true, eager: true })
   conversation: Conversation;
 
-  @Column("longtext")
+  @Column("text")
   text: string;
 
   @UpdateDateColumn()

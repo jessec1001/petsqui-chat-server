@@ -16,7 +16,7 @@ export default class UserDevice {
     @JoinColumn()
     owner: User;
 
-    @Column("longtext")
+    @Column("text")
     token: string;
 
     @PrimaryColumn("varchar", { length: 8 })
