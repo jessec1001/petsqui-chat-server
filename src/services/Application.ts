@@ -27,6 +27,7 @@ export default class Application {
   }
 
   private configureRoutes(): void {
+    this.app.use(express.static('public'));
     // this.app.use('/api/token', TokenController.createInstance().getRouter());
   }
 
