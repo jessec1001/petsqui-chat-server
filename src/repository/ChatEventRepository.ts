@@ -24,7 +24,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .innerJoin("event.conversation", "conversation")
       .innerJoin("conversation.participants", "participant", "participant.id = :userId", { userId })
       .leftJoin((qb) => {
-        return qb.select("reads.eventId")
+        return qb.select("reads.eventId", "eventId")
           .addSelect("reads.userId", "userId")
           .from("eventReads", "reads")
           .where("reads.userId = :userId", { userId });
@@ -77,8 +77,8 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
 
   async markEventRead(eventId: string, userId: string): Promise<boolean> {
     try {
-      const query = "INSERT INTO eventReads(eventId, userId) VALUES(?, ?) ON CONFLICT (id) DO NOTHING";
-      this.query(query, [eventId, userId]);
+      //const query = "INSERT INTO eventReads(eventId, userId) VALUES(?, ?) ON CONFLICT (\"userId\") DO NOTHING";
+      //this.query(query, [eventId, userId]);
       return true;
     } catch (err) {
       return false;
