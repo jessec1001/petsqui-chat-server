@@ -1,10 +1,12 @@
 FROM node:current-alpine
 WORKDIR /server
 
-COPY . /server
+COPY src /server
+COPY public /server
+COPY package.json /server
+COPY tsconfig.json /server
+COPY yarn.lock /server
 RUN apk add --no-cache --virtual .gyp \
-        make \
-        g++ \
         yarn &&\
     yarn install && \
     yarn run build && \

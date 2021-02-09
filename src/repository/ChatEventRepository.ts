@@ -24,8 +24,8 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .innerJoin("event.conversation", "conversation")
       .innerJoin("conversation.participants", "participant", "participant.id = :userId", { userId })
       .leftJoin((qb) => {
-        return qb.select("eventId")
-          .addSelect("userId")
+        return qb.select("reads.eventId")
+          .addSelect("reads.userId", "userId")
           .from("eventReads", "reads")
           .where("reads.userId = :userId", { userId });
       }, "reads", "reads.eventId = event.id")
@@ -61,13 +61,14 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
   async markConversationRead(conversationId: string, userId: string): Promise<boolean> {
     try {
       const tableName = this.metadata.tableName;
-      const query = `
-      INSERT IGNORE INTO eventReads(eventId, userId)
+      /*const query = `
+      INSERT INTO eventReads(eventId, userId)
         SELECT event.id, ? FROM ${tableName} event
         INNER JOIN conversation ON conversation.id = event.conversationId
         WHERE conversation.id = ?
+        ON CONFLICT (id) DO NOTHING
       `;
-      this.query(query, [userId, conversationId]);
+      this.query(query, [userId, conversationId]);*/
       return true;
     } catch (err) {
       return false;
@@ -76,7 +77,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
 
   async markEventRead(eventId: string, userId: string): Promise<boolean> {
     try {
-      const query = "INSERT IGNORE INTO eventReads(eventId, userId) VALUES(?, ?)";
+      const query = "INSERT INTO eventReads(eventId, userId) VALUES(?, ?) ON CONFLICT (id) DO NOTHING";
       this.query(query, [eventId, userId]);
       return true;
     } catch (err) {

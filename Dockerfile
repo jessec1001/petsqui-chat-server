@@ -1,9 +1,6 @@
 FROM node:current-alpine
 
 RUN apk add --no-cache --virtual .gyp \
-        python \
-        make \
-        g++ \
         yarn
 
 WORKDIR /server
