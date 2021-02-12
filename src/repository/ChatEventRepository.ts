@@ -41,11 +41,11 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .innerJoinAndSelect("event.owner", "owner")
       .innerJoin(subQuery => {
         return subQuery
-          .select("conversationId, MAX(updatedAt) updatedAt")
+          .select('"conversationId", MAX("updatedAt") "updatedAt"')
           .from(ChatEvent, "last")
-          .orderBy("updatedAt", "DESC")
-          .groupBy("conversationId");
-      }, "last", "`last`.`conversationId` = conversation.id AND last.updatedAt = event.updatedAt")
+          .orderBy('"updatedAt"', "DESC")
+          .groupBy('"conversationId"');
+      }, "last", '"last"."conversationId" = "conversation"."id" AND "last"."updatedAt" = "event"."updatedAt"')
       .where("conversation.id IN (:ids)", { ids: conversations.map(c => c.id) })
       .getMany();
 

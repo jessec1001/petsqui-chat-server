@@ -9,7 +9,7 @@ const log = debug("application:wevive-api");
 
 export interface UserResponseInterface {
   id: string;
-  email: string;
+  phone_number: string;
   public_key: string;
 }
 
@@ -64,7 +64,7 @@ export default class WeviveApi implements UsersProviderInterface {
       return response.result.results.map(user => {
         return {
           id: user.id,
-          username: user.email,
+          username: user.phone_number,
           //avatar: user.avatar && user.avatar.url,
           //color: user.color && user.color.color,
         };
@@ -99,7 +99,7 @@ export default class WeviveApi implements UsersProviderInterface {
       const parsedResponse = <UserResponseInterface>response.result;
       return {
         id: parsedResponse.id,
-        username: parsedResponse.email,
+        username: parsedResponse.phone_number,
         //avatar: parsedResponse.avatar && parsedResponse.avatar.url,
         //color: parsedResponse.color && parsedResponse.color.color,
         public_key: options.public_key,
@@ -128,11 +128,11 @@ export default class WeviveApi implements UsersProviderInterface {
         },
       );
       return response.result.results.filter(result => {
-        return result && result.email;
+        return result && result.phone_number;
       }).map(result => {
         return {
           id: result.id,
-          username: result.email,
+          username: result.phone_number,
           //avatar: user.avatar && user.avatar.url,
           //color: user.color && user.color.color,
         };
