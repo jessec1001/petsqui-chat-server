@@ -1,8 +1,8 @@
 FROM node:current-alpine
 WORKDIR /server
 
-COPY src /server
-COPY public /server
+COPY src /server/src
+COPY public /server/public
 COPY package.json /server
 COPY tsconfig.json /server
 COPY yarn.lock /server
