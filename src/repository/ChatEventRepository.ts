@@ -27,7 +27,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
         return qb.select("reads.eventId", "eventId")
           .addSelect("reads.userId", "userId")
           .from("eventReads", "reads")
-          .where("reads.userId = :userId", { userId });
+          .where('"reads"."userId" = :userId', { userId });
       }, "reads", '"reads"."eventId" = event.id')
       .where("reads.userId is null")
       .groupBy("conversation.id")
