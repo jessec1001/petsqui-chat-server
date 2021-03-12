@@ -51,7 +51,7 @@ export default class UserRepository extends Repository<User> {
       .orUpdate({
         overwrite,
         // eslint-disable-next-line @typescript-eslint/camelcase
-        conflict_target: '"PK_cace4a159ff9f2512dd42373760"',
+        conflict_target: 'id',
       })
       .into(User)
       .values(user)

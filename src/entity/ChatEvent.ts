@@ -44,7 +44,7 @@ export default class ChatEvent {
   @ManyToOne(() => Conversation, conversation => conversation.events, { cascade: true, eager: true })
   conversation: Conversation;
 
-  @Column("text")
+  @Column("text", {nullable: true})
   text: string;
 
   @UpdateDateColumn()

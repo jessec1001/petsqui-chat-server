@@ -13,7 +13,7 @@ export default class Conversation {
   @PrimaryColumn("varchar", { length: 36 })
   id: string;
 
-  @ManyToMany(() => User, user => user.conversations, { cascade: true })
+  @ManyToMany(() => User, user => user.conversations, { eager: false, cascade: true })
   @JoinTable()
   participants: Promise<User[]>;
 

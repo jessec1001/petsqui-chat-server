@@ -27,9 +27,9 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
         return qb.select("reads.eventId", "eventId")
           .addSelect("reads.userId", "userId")
           .from("eventReads", "reads")
-          .where('"reads"."userId" = :userId', { userId });
-      }, "reads", '"reads"."eventId" = event.id')
-      .where('"reads"."userId" is null')
+          .where('reads.userId = :userId', { userId });
+      }, "reads", 'reads.eventId = event.id')
+      .where('reads.userId is null')
       .groupBy("conversation.id")
       .getRawMany();
   }
@@ -41,11 +41,11 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .innerJoinAndSelect("event.owner", "owner")
       .innerJoin(subQuery => {
         return subQuery
-          .select('"conversationId", MAX("updatedAt") "updatedAt"')
+          .select('conversationId, MAX("updatedAt") updatedAt')
           .from(ChatEvent, "last")
-          .orderBy('"updatedAt"', "DESC")
-          .groupBy('"conversationId"');
-      }, "last", '"last"."conversationId" = "conversation"."id" AND "last"."updatedAt" = "event"."updatedAt"')
+          .orderBy('updatedAt', "DESC")
+          .groupBy('conversationId');
+      }, "last", 'last.conversationId = conversation.id AND last.updatedAt = event.updatedAt')
       .where("conversation.id IN (:ids)", { ids: conversations.map(c => c.id) })
       .getMany();
 

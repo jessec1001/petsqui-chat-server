@@ -1,13 +1,20 @@
 FROM node:current-alpine
-
-RUN apk add --no-cache --virtual .gyp \
-        yarn
-
 WORKDIR /server
-
-COPY . /server
-RUN yarn install
-RUN yarn run build
+ARG version1
+COPY src src
+COPY package.json package.json
+COPY public public
+COPY tsconfig.json /server
+COPY yarn.lock /server
+COPY patches /server/patches
+RUN apk add --no-cache --virtual .gyp \
+        python \
+        make \
+        g++ \
+        && apk add yarn \
+        && yarn install \
+        && yarn run build \
+        && apk del .gyp
 
 EXPOSE 3000
 CMD [ "yarn", "run", "start" ]
