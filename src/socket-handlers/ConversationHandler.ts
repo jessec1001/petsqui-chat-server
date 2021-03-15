@@ -87,15 +87,14 @@ export default class ConversationHandler {
       if (!owner) {
         throw new Error("Invalid conversation.");
       }
+      const newParticipants = participants.filter(participant => participant.id != socket.userId);
+      conversation.participants = new Promise((resolve) => resolve(newParticipants));
       if (!hidden) {
         const leftEvent = ChatEvent.createUserLeft(owner, conversation);
         this.eventsRepository.save(leftEvent);
+      } else {
+        this.conversationRepository.save(conversation);
       }
-      const newParticipants = participants.filter(participant => participant.id != socket.userId);
-      conversation.participants = new Promise((resolve) => resolve(newParticipants));
-
-      this.conversationRepository.save(conversation);
-      
       return fn({ success: true });
     } catch (error) {
       log(error);
