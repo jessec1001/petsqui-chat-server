@@ -28,11 +28,12 @@ export default class ConversationHandler {
     this.server = server;
   }
 
-  fetch = (socket: Socket) => async (fn: Function): Promise<void> => {
+  fetch = (socket: Socket) => async (
+    { since }: { since: number }, fn: Function
+  ): Promise<void> => {
     try {
       let conversations = await this.conversationRepository
-        .getConversations(socket.userId);
-
+        .getConversations(socket.userId, 0, 999999, since);
       conversations = await this.eventsRepository.mapLastEvent(conversations);
 
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {

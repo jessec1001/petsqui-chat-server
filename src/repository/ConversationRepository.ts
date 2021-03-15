@@ -22,11 +22,12 @@ export default class ConversationRepository extends Repository<Conversation> {
     return masterConversation;
   }
 
-  async getConversations(id: string, skip = 0, take = 999999): Promise<Conversation[]> {
+  async getConversations(id: string, skip = 0, take = 999999, since = 0): Promise<Conversation[]> {
     return this.createQueryBuilder("conversation")
       .leftJoinAndSelect("conversation.participants", "participants")
       .leftJoinAndMapOne("conversation.lastEvent", "conversation.events", "lastEvent")
       .where("participants.id = :id", { id })
+      .where('conversation.createdAt >= to_timestamp(cast(:since as bigint))::date', {since})
       .take(take)
       .skip(skip)
       .orderBy("conversation.updatedAt", "DESC")
