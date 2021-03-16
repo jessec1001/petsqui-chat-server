@@ -42,7 +42,7 @@ export default class TypingEventHandler implements SocketHandlerInterface {
       }
 
       // send to all participants.
-      this.server.emitToConversation(conversation, "events:typing", { userId: socket.userId }, [socket.userId]);
+      this.server.emitToConversation(conversation, "events:typing", { userId: socket.userId, conversationId: conversation.id }, [socket.userId]);
 
       // notify the user.
       if (fn) {
