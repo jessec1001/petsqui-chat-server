@@ -61,14 +61,14 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
   async markConversationRead(conversationId: string, userId: string): Promise<boolean> {
     try {
       const tableName = this.metadata.tableName;
-      /*const query = `
-      INSERT INTO eventReads(eventId, userId)
-        SELECT event.id, ? FROM ${tableName} event
-        INNER JOIN conversation ON conversation.id = event.conversationId
-        WHERE conversation.id = ?
-        ON CONFLICT (id) DO NOTHING
+      const query = `
+      INSERT INTO "eventReads"("eventId", "userId")
+        SELECT "event"."id", ? FROM ${tableName} "event"
+        INNER JOIN "conversation" ON "conversation"."id" = "event"."conversationId"
+        WHERE "conversation"."id" = ?
+        ON CONFLICT ("id") DO NOTHING
       `;
-      this.query(query, [userId, conversationId]);*/
+      this.query(query, [userId, conversationId]);
       return true;
     } catch (err) {
       return false;
@@ -77,8 +77,9 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
 
   async markEventRead(eventId: string, userId: string): Promise<boolean> {
     try {
-      //const query = "INSERT INTO eventReads(eventId, userId) VALUES(?, ?) ON CONFLICT (\"userId\") DO NOTHING";
-      //this.query(query, [eventId, userId]);
+      //
+      const query = 'INSERT INTO "eventReads"("eventId", "userId") VALUES ($1, $2) ON CONFLICT ("eventId", "userId") DO NOTHING';
+      this.query(query, [eventId, userId]);
       return true;
     } catch (err) {
       return false;
