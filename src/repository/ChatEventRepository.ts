@@ -37,6 +37,7 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
   async mapLastEvent(conversations: Conversation[]): Promise<Conversation[]> {
     const events = await this.createQueryBuilder()
       .select("event").from(ChatEvent, "event")
+      .distinct(true)
       .innerJoinAndSelect("event.conversation", "conversation")
       .innerJoinAndSelect("event.owner", "owner")
       .innerJoin(subQuery => {
@@ -63,10 +64,10 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       const tableName = this.metadata.tableName;
       const query = `
       INSERT INTO "eventReads"("eventId", "userId")
-        SELECT "event"."id", ? FROM ${tableName} "event"
+        SELECT "event"."id", $1 FROM ${tableName} "event"
         INNER JOIN "conversation" ON "conversation"."id" = "event"."conversationId"
-        WHERE "conversation"."id" = ?
-        ON CONFLICT ("id") DO NOTHING
+        WHERE "conversation"."id" = $2
+        ON CONFLICT ("eventId", "userId") DO NOTHING
       `;
       this.query(query, [userId, conversationId]);
       return true;

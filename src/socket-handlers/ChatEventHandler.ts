@@ -28,7 +28,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   }
 
   newMessage = (socket: Socket) => async (
-    { conversationId, message },
+    { conversationId, message, nonce },
     fn: Function
   ): Promise<void> => {
 
@@ -61,11 +61,11 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
       // notify the user.
       if (fn) {
-        fn({ success: true, event: eventResponse });
+        fn({ success: true, event: eventResponse, nonce });
       }
     } catch (err) {
       log(err);
-      return fn && fn({ success: false, error: (err as Error).message });
+      return fn && fn({ success: false, error: (err as Error).message, nonce });
     }
 
   };
