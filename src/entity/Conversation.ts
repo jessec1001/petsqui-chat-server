@@ -35,6 +35,9 @@ export default class Conversation {
   @Column({nullable: true})
   publicKey: string;
 
+  @Column({nullable: true})
+  createdBy: string;
+
   @UpdateDateColumn()
   updatedAt: Date;
 
@@ -71,27 +74,6 @@ export default class Conversation {
     });
   }
 
-  async getNameFor(owner: User, participants: User[] = null): Promise<string> {
-    if (this.id === "master") {
-      return "All Users";
-    }
-
-    if (!participants) {
-      participants = await this.participants;
-    }
-
-    let name = "";
-    if (Array.isArray(participants)) {
-      name = participants.filter(participant => participant.id !== owner.id).map(p => p.username).join(', ');
-    }
-
-    if (!name) {
-      name = owner.username;
-    }
-
-    return name;
-  }
-
   async toResponse(loggedInId: string): Promise<ConversationResponse|null> {
     const participants = await this.participants;
     const current = participants.filter(p => p.id == loggedInId).pop();
@@ -101,7 +83,7 @@ export default class Conversation {
     return {
       id: this.id,
       time: this.createdAt,
-      name: await this.getNameFor(current, participants),
+      name: this.name,
       groupName: this.name,
       publicName: this.publicName,
       key: this.publicKey,
@@ -109,6 +91,7 @@ export default class Conversation {
       publicAvatar: this.publicAvatar,
       lastEvent: this.lastEvent && this.lastEvent.toResponse(),
       participants: participants.map(p => p.toResponse()),
+      createdBy: this.createdBy
     };
   }
 }
@@ -124,4 +107,5 @@ export interface ConversationResponse {
   time: Date;
   lastEvent: ChatEventResponse;
   participants: UserResponse[];
+  createdBy: string;
 }

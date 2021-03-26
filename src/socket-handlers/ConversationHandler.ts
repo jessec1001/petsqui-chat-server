@@ -50,11 +50,14 @@ export default class ConversationHandler {
   };
 
   create = (socket: Socket) => async (
-    { participants }: { participants: UserResponse[] }, fn: Function
+    { participants, name, avatar }: { participants: UserResponse[], name: string, avatar: string }, fn: Function
   ): Promise<void> => {
     try {
       if (socket.user) {
         const conversation = new Conversation();
+        conversation.name = name;
+        conversation.avatar = avatar;
+        conversation.createdBy = socket.userId;
         participants.push(socket.user);
         const users = participants.map(p => User.createFromResponse(p));
         await this.userRepository.bulkInsertOrUpdate(users);
@@ -103,9 +106,32 @@ export default class ConversationHandler {
     }
   };
 
+  updateAvatar = (socket: Socket) => async (
+    { conversationId, name, avatar }: { conversationId: string, name: string, avatar: string }, fn: Function
+  ): Promise<void> => {
+    try {
+      const conversation = await this.conversationRepository.findById(conversationId);
+      if (!conversation) {
+        throw new Error("Conversation was not found!");
+      }
+      if (conversation.createdBy != socket.userId) {
+        throw new Error("Conversation was not found!");
+      }
+      conversation.name = name;
+      conversation.avatar = avatar;
+      this.conversationRepository.save(conversation);
+      
+      return fn({ success: true });
+    } catch (error) {
+      log(error);
+      return fn({ success: false, error });
+    }
+  };
+
   public handle(socket: Socket): void {
     socket.on("conversations:fetch", this.fetch(socket));
     socket.on("conversations:create", this.create(socket));
+    socket.on("conversations:updateAvatar", this.updateAvatar(socket));
     socket.on("conversations:delete", this.delete(socket));
   }
 
