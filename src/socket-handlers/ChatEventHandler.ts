@@ -108,7 +108,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   markRead = (socket: Socket) => async ({ conversationId, eventId }, fn): Promise<void> => {
     if (socket.userId) {
       const conversation = await this.conversationRepository.findById(conversationId);
-      this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId }, [socket.userId]);
+      this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId, userId: socket.userId }, [socket.userId]);
       if (!eventId) {
         const success = await this.eventRepository.markConversationRead(conversationId, socket.userId);
         fn({ success });
