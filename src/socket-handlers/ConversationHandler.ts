@@ -34,7 +34,7 @@ export default class ConversationHandler {
     try {
       let conversations = await this.conversationRepository
         .getConversations(socket.userId, 0, 999999, since);
-      conversations = await this.eventsRepository.mapLastEvent(conversations);
+      //conversations = await this.eventsRepository.mapLastEvent(conversations);
 
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {
         return c.toResponse(socket.userId);

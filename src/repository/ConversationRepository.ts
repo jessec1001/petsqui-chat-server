@@ -1,4 +1,5 @@
 import { Repository, EntityRepository } from "typeorm";
+import { ChatEvent } from "../entity";
 import Conversation from "../entity/Conversation";
 
 @EntityRepository(Conversation)
@@ -25,7 +26,13 @@ export default class ConversationRepository extends Repository<Conversation> {
   async getConversations(id: string, skip = 0, take = 999999, since = 0): Promise<Conversation[]> {
     return this.createQueryBuilder("conversation")
       .leftJoinAndSelect("conversation.participants", "participants")
-      .leftJoinAndMapOne("conversation.lastEvent", "conversation.events", "lastEvent")
+      .leftJoinAndMapOne("lastEvent", subQuery => {
+        return subQuery
+          .select()
+          .from(ChatEvent, 'lastEvent')
+          .orderBy('"createdAt"', 'DESC')
+          .limit(1);
+      }, "events", 'events."conversation_id" = conversation.id')
       .where("participants.id = :id", { id })
       .where('conversation.createdAt >= to_timestamp(cast(:since as bigint))::date', {since})
       .take(take)
