@@ -1,6 +1,6 @@
 {
     "name": "chat-backend",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Awesome project developed with TypeORM.",
     "devDependencies": {
         "@types/bcrypt": "^3.0.0",
@@ -45,6 +45,6 @@
         "debug": "nodemon --legacy-watch --watch ./build --inspect=0.0.0.0:5858 --nolazy ./build/index.js",
         "local-watch": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts",
         "local-debug": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts --inspect=0.0.0.0:5858",
-        "docker-run": "docker-compose up"
+        "docker-run": "tsc -p ./ && docker-compose up"
     }
 }

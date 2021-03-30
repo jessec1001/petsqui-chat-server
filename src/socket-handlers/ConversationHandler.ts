@@ -32,19 +32,23 @@ export default class ConversationHandler {
     { since }: { since: number }, fn: Function
   ): Promise<void> => {
     try {
-      let conversations = await this.conversationRepository
+      const conversations = await this.conversationRepository
         .getConversations(socket.userId, 0, 999999, since);
+      //log(conversations);
       //conversations = await this.eventsRepository.mapLastEvent(conversations);
-
+      //log(conversations);
+      
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {
         return c.toResponse(socket.userId);
       };
 
+      const transformedConversations = await Promise.all(conversations.map(transformConversation));
+      //log(transformedConversations);
       fn(
-        { success: true, conversations: await Promise.all(conversations.map(transformConversation)) }
+        { success: true, conversations: transformedConversations }
       );
     } catch (err) {
-      log(err);
+      //log(err);
       fn({ success: false, conversations: [] });
     }
   };

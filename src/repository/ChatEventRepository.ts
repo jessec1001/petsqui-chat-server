@@ -1,6 +1,9 @@
 import { Repository, EntityRepository, MoreThan, LessThan } from "typeorm";
 import ChatEvent from "../entity/ChatEvent";
 import { Conversation } from "../entity";
+import debug from "debug";
+
+const log = debug("application:chat_event");
 
 interface OptionsInput {
   username: string;
@@ -40,18 +43,11 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
       .distinct(true)
       .innerJoinAndSelect("event.conversation", "conversation")
       .innerJoinAndSelect("event.owner", "owner")
-      .innerJoin(subQuery => {
-        return subQuery
-          .select('"conversationId", MAX("updatedAt") "updatedAt"')
-          .from(ChatEvent, "last")
-          .orderBy('"updatedAt"', "DESC")
-          .groupBy('"conversationId"');
-      }, "last", '"last"."conversationId" = "conversation"."id" AND "last"."updatedAt" = "event"."updatedAt"')
-      .where("conversation.id IN (:ids)", { ids: conversations.map(c => c.id) })
+      .where("event.id IN (:ids)", { ids: conversations.map(c => c.lastEvent.id) })
       .getMany();
-
+    //log(events);
     return conversations.map(c => {
-      const event = events.find(e => e.conversation.id == c.id);
+      const event = events.find(e => e.id == c.lastEvent.id);
       if (event) {
         c.lastEvent = event;
       }
