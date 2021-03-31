@@ -38,12 +38,13 @@ export default class ChatEventRepository extends Repository<ChatEvent> {
   }
 
   async mapLastEvent(conversations: Conversation[]): Promise<Conversation[]> {
-    const events = await this.createQueryBuilder()
-      .select("event").from(ChatEvent, "event")
+    const eventIds = conversations.map(c => c.lastEvent.id);
+    //log(eventIds);
+    const events = await this.createQueryBuilder("event")
       .distinct(true)
-      .innerJoinAndSelect("event.conversation", "conversation")
+      //.innerJoinAndSelect("event.conversation", "conversation")
       .innerJoinAndSelect("event.owner", "owner")
-      .where("event.id IN (:ids)", { ids: conversations.map(c => c.lastEvent.id) })
+      .where('"event"."id" = ANY(:ids)', { ids: eventIds })
       .getMany();
     //log(events);
     return conversations.map(c => {

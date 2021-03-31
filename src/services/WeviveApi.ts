@@ -11,6 +11,9 @@ export interface UserResponseInterface {
   id: string;
   phone_number: string;
   public_key: string;
+  name: string;
+  username: string;
+  avatar: string;
 }
 
 interface ApiResponseInterface {
@@ -65,7 +68,9 @@ export default class WeviveApi implements UsersProviderInterface {
         return {
           id: user.id,
           username: user.phone_number,
-          //avatar: user.avatar && user.avatar.url,
+          name: user.name,
+          nickname: user.username,
+          avatar: user.avatar,
           //color: user.color && user.color.color,
         };
       });
@@ -100,7 +105,9 @@ export default class WeviveApi implements UsersProviderInterface {
       return {
         id: parsedResponse.id,
         username: parsedResponse.phone_number,
-        //avatar: parsedResponse.avatar && parsedResponse.avatar.url,
+        avatar: parsedResponse.avatar,
+        name: parsedResponse.name,
+        nickname: parsedResponse.username,
         //color: parsedResponse.color && parsedResponse.color.color,
         public_key: options.public_key,
       };
@@ -133,7 +140,9 @@ export default class WeviveApi implements UsersProviderInterface {
         return {
           id: result.id,
           username: result.phone_number,
-          //avatar: user.avatar && user.avatar.url,
+          phone_number: result.username,
+          avatar: result.avatar,
+          name: result.name,
           //color: user.color && user.color.color,
         };
       });

@@ -21,6 +21,12 @@ export default class User {
   username: string;
 
   @Column({ nullable: true })
+  name: string;
+
+  @Column({ nullable: true })
+  nickname: string;
+
+  @Column({ nullable: true })
   avatar: string;
 
   @Column({ nullable: true })
@@ -53,6 +59,7 @@ export default class User {
   toResponse(include_salt=false): UserResponse {
     return {
       id: this.id,
+      name: this.name,
       username: this.username,
       color: this.color,
       avatar: this.avatar,
@@ -70,6 +77,7 @@ export default class User {
 
   updateFromResponse(userResponse: UserResponse): void {
     this.username = userResponse.username;
+    this.name = userResponse.name;
     if (userResponse.avatar) {
       this.avatar = userResponse.avatar;
     }
@@ -82,7 +90,10 @@ export default class User {
 
 export interface UserResponse {
   id: string;
+  name?: string;
   username: string;
+  phone_number?: string;
+  nickname?: string;
   color?: string;
   avatar?: string;
   public_key ?: string;

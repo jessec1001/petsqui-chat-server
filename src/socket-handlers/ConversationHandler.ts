@@ -32,10 +32,10 @@ export default class ConversationHandler {
     { since }: { since: number }, fn: Function
   ): Promise<void> => {
     try {
-      const conversations = await this.conversationRepository
+      let conversations = await this.conversationRepository
         .getConversations(socket.userId, 0, 999999, since);
       //log(conversations);
-      //conversations = await this.eventsRepository.mapLastEvent(conversations);
+      conversations = await this.eventsRepository.mapLastEvent(conversations);
       //log(conversations);
       
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {

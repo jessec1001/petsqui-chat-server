@@ -5,12 +5,10 @@ import Conversation from "../entity/Conversation";
 @EntityRepository(Conversation)
 export default class ConversationRepository extends Repository<Conversation> {
   async findById(id: string): Promise<Conversation> {
-    return this.findOne(
-      {
-        where: { id },
-        relations: ['participants']
-      }
-    );
+    return this.createQueryBuilder("conversation")
+      .leftJoinAndSelect("conversation.participants", "participants")
+      .where('"conversation"."id" = :id', {id})
+      .getOne();
   }
 
   async getMasterConversation(): Promise<Conversation> {
