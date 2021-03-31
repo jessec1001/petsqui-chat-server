@@ -31,8 +31,15 @@ export default class ConversationRepository extends Repository<Conversation> {
           .orderBy('"updatedAt"', "DESC")
           .groupBy('"id","conversationId"');
       }, "lastEvent", '"lastEvent"."conversationId" = conversation.id')
-      .where('participants.id = :id', {id})
+      .leftJoinAndSelect(subQuery => {
+        return subQuery
+          .select('"conversationId", COUNT(*) "count"')
+          .from("conversation_participants_user", "participants")
+          .where('"participants"."userId" = :id', {id})
+          .groupBy('"conversationId"');
+      }, "conversationParticipants", '"conversationParticipants"."conversationId" = "conversation"."id"')
       .innerJoinAndMapOne("conversation.lastEvent", ChatEvent, 'events', 'events.id = "lastEvent"."id"')
+      .where('"conversationParticipants"."count" > 0')
       .take(take)
       .skip(skip)
       .orderBy("conversation.updatedAt", "DESC")
