@@ -38,8 +38,8 @@ export default class SocialHandler implements SocketHandlerInterface {
         }
         return p;
       });
-      //const users = followings.map(p => User.createFromResponse(p));
-      //this.userRepository.bulkInsertOrUpdate(users);
+      const users = followings.map(p => User.createFromResponse(p));
+      this.userRepository.bulkInsertOrUpdate(users);
       fn({ success: true, followings: followingsWithKeys });
     } catch (err) {
       log(err);

@@ -72,6 +72,9 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
   fetch = (socket: Socket) => (
     async ({ conversationId, skip = 0 }, fn: Function): Promise<void> => {
+      if (!conversationId) {
+        fn({ success: false });
+      }
       try {
         const events = await this.eventRepository.find({
           where: { conversation: { id: conversationId } },
@@ -107,6 +110,9 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   
   markRead = (socket: Socket) => async ({ conversationId, eventId }, fn): Promise<void> => {
     if (socket.userId) {
+      if (!conversationId) {
+        fn({ success: false });
+      }
       const conversation = await this.conversationRepository.findById(conversationId);
       this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId, userId: socket.userId }, [socket.userId]);
       if (!eventId) {
