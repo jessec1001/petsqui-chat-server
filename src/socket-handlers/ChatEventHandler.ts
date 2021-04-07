@@ -48,7 +48,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       if (!owner) {
         throw new Error("Invalid user logged in.");
       }
-
+      await this.userRepository.setLastOnline(socket.userId);
       // create message event.
       const event = ChatEvent.createMessage(owner, conversation, message);
       await this.eventRepository.save(event);
@@ -84,7 +84,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
           loadEagerRelations: false,
           relations: ['owner']
         });
-
+        await this.userRepository.setLastOnline(socket.userId);
         fn({ success: true, events: events.map(e => e.toResponse()) });
       } catch (err) {
         log(err);

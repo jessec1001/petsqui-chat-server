@@ -37,6 +37,7 @@ export default class ConversationHandler {
       //log(conversations);
       conversations = await this.eventsRepository.mapLastEvent(conversations);
       //log(conversations);
+      await this.userRepository.setLastOnline(socket.userId);
       
       const transformConversation = async (c: Conversation): Promise<ConversationResponse> => {
         return c.toResponse(socket.userId);
@@ -65,6 +66,7 @@ export default class ConversationHandler {
         participants.push(socket.user);
         const users = participants.map(p => User.createFromResponse(p));
         await this.userRepository.bulkInsertOrUpdate(users);
+        await this.userRepository.setLastOnline(socket.userId);
         conversation.addParticipants(users);
         getConnection().transaction(async entityManager => {
           await entityManager.getCustomRepository(ConversationRepository).save(conversation);

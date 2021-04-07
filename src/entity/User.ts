@@ -37,6 +37,9 @@ export default class User {
 
   @Column({ nullable: true })
   color: string;
+  
+  @Column({ nullable: true })
+  lastOnline: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
@@ -64,6 +67,7 @@ export default class User {
       color: this.color,
       avatar: this.avatar,
       public_key: this.public_key,
+      lastOnline: this.lastOnline,
       salt: "SALT",
     };
   }
@@ -98,4 +102,5 @@ export interface UserResponse {
   avatar?: string;
   public_key ?: string;
   salt ?: string;
+  lastOnline ?: string;
 }
