@@ -102,5 +102,5 @@ export interface UserResponse {
   avatar?: string;
   public_key ?: string;
   salt ?: string;
-  lastOnline ?: string;
+  lastOnline ?: Date;
 }
