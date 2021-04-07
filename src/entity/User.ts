@@ -33,6 +33,9 @@ export default class User {
   salt: string;
 
   @Column({ nullable: true })
+  status: string;
+
+  @Column({ nullable: true })
   public_key: string;
 
   @Column({ nullable: true })
@@ -68,6 +71,7 @@ export default class User {
       avatar: this.avatar,
       public_key: this.public_key,
       lastOnline: this.lastOnline,
+      status: this.status,
       salt: "SALT",
     };
   }
@@ -103,4 +107,5 @@ export interface UserResponse {
   public_key ?: string;
   salt ?: string;
   lastOnline ?: Date;
+  status ?: string;
 }
