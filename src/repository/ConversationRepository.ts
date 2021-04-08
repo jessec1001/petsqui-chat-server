@@ -26,10 +26,10 @@ export default class ConversationRepository extends Repository<Conversation> {
       .leftJoinAndSelect("conversation.participants", "participants")
       .leftJoinAndSelect(subQuery => {
         return subQuery
-          .select('"id", "conversationId", MAX("updatedAt") "updatedAt"')
+          .select('"conversationId", MAX("createdAt") "createdAt"')
           .from(ChatEvent, "last")
-          .orderBy('"updatedAt"', "DESC")
-          .groupBy('"id","conversationId"');
+          .orderBy('"createdAt"', "DESC")
+          .groupBy('"conversationId"');
       }, "lastEvent", '"lastEvent"."conversationId" = conversation.id')
       .leftJoinAndSelect(subQuery => {
         return subQuery
@@ -38,7 +38,7 @@ export default class ConversationRepository extends Repository<Conversation> {
           .where('"participants"."userId" = :id', {id})
           .groupBy('"conversationId"');
       }, "conversationParticipants", '"conversationParticipants"."conversationId" = "conversation"."id"')
-      .innerJoinAndMapOne("conversation.lastEvent", ChatEvent, 'events', 'events.id = "lastEvent"."id"')
+      .innerJoinAndMapOne("conversation.lastEvent", ChatEvent, 'events', '"events"."conversationId"="conversation"."id" AND "events"."createdAt" = "lastEvent"."createdAt"')
       .where('"conversationParticipants"."count" > 0')
       .take(take)
       .skip(skip)
