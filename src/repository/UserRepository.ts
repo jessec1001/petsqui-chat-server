@@ -27,6 +27,14 @@ export default class UserRepository extends Repository<User> {
     this.save(user);
     return user;
   }
+  async getLastOnline(users: string[]): Promise<User[]> {
+    return this.createQueryBuilder("user")
+      .whereInIds(users)
+      .select([
+        "user.id","user.lastOnline"
+      ])
+      .getMany();
+  }
   async bulkSelectKeys(users: string[]): Promise<User[]> {
     return this.createQueryBuilder("user")
       .whereInIds(users)

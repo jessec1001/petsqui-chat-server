@@ -47,6 +47,16 @@ export default class SocialHandler implements SocketHandlerInterface {
     }
   };
 
+  getLastOnline = (socket: Socket) => async ({ ids = [] }, fn: Function): Promise<void> => {
+    try {
+      const lastOnline = await this.userRepository.getLastOnline(ids);
+      fn({ success: true, lastOnline });
+    } catch (err) {
+      log(err);
+      fn({ success: false, followings: [] });
+    }
+  };
+
   search = (socket: Socket) => async ({query, page = 1}, fn: Function): Promise<void> => {
     try {
       const results = await this.usersProvider.getSearchResults(socket, query, page);
@@ -58,6 +68,7 @@ export default class SocialHandler implements SocketHandlerInterface {
   };
 
   handle(socket: Socket): void {
+    socket.on("users:get_last_online", this.getLastOnline(socket));
     socket.on("users:get_followings", this.getFollowings(socket));
     socket.on("users:search", this.search(socket));
   }
