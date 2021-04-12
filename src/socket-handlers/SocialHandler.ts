@@ -53,7 +53,7 @@ export default class SocialHandler implements SocketHandlerInterface {
       fn({ success: true, lastOnline });
     } catch (err) {
       log(err);
-      fn({ success: false, followings: [] });
+      fn({ success: false, lastOnline: [] });
     }
   };
 
