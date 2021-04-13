@@ -31,7 +31,7 @@ export default class UserRepository extends Repository<User> {
     return this.createQueryBuilder("user")
       .whereInIds(users)
       .select([
-        "user.id","user.lastOnline"
+        "user.id","user.lastOnline","user.status"
       ])
       .getMany();
   }

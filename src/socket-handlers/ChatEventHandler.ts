@@ -73,7 +73,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   fetch = (socket: Socket) => (
     async ({ conversationId, skip = 0 }, fn: Function): Promise<void> => {
       if (!conversationId) {
-        fn({ success: false });
+        fn && fn({ success: false });
       }
       try {
         const events = await this.eventRepository.find({
@@ -88,42 +88,46 @@ export default class ChatEventHandler implements SocketHandlerInterface {
         fn({ success: true, events: events.map(e => e.toResponse()) });
       } catch (err) {
         log(err);
-        fn({ success: false, events: [] });
+        fn && fn({ success: false, events: [] });
       }
     }
   );
 
   getUnreadEventsCount = (socket: Socket) => async (fn): Promise<void> => {
-    if (!socket.userId) {
-      fn({ success: false, stats: [] });
-      return;
-    }
-
     try {
+      if (!socket.userId) {
+        fn && fn({ success: false, stats: [] });
+        return;
+      }
       const stats = await this.eventRepository.getUnreadStats(socket.userId);
       fn({ success: true, stats });
     } catch (err) {
       log(err);
-      fn({ success: false, stats: [] });
+      //fn({ success: false, stats2: [] });
     }
   };
   
   markRead = (socket: Socket) => async ({ conversationId, eventId }, fn): Promise<void> => {
-    if (socket.userId) {
-      if (!conversationId) {
-        fn({ success: false });
-      }
-      const conversation = await this.conversationRepository.findById(conversationId);
-      this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId, userId: socket.userId }, [socket.userId]);
-      if (!eventId) {
-        const success = await this.eventRepository.markConversationRead(conversationId, socket.userId);
-        fn({ success });
+    try {
+      if (socket.userId) {
+        if (!conversationId) {
+          fn && fn({ success: false });
+        }
+        const conversation = await this.conversationRepository.findById(conversationId);
+        this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId, userId: socket.userId }, [socket.userId]);
+        if (!eventId) {
+          const success = await this.eventRepository.markConversationRead(conversationId, socket.userId);
+          fn && fn({ success });
+        } else {
+          const success = await this.eventRepository.markEventRead(eventId, socket.userId);
+          fn &&fn({ success });
+        }
       } else {
-        const success = await this.eventRepository.markEventRead(eventId, socket.userId);
-        fn({ success });
+        fn && fn({ success: false });
       }
-    } else {
-      fn({ success: false });
+    } catch (err) {
+      log(err);
+      //fn({ success: false, stats: [] });
     }
   };
 
