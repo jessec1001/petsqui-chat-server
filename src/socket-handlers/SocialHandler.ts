@@ -40,30 +40,30 @@ export default class SocialHandler implements SocketHandlerInterface {
       });
       const users = followings.map(p => User.createFromResponse(p));
       this.userRepository.bulkInsertOrUpdate(users);
-      fn({ success: true, followings: followingsWithKeys });
+      fn && fn({ success: true, followings: followingsWithKeys });
     } catch (err) {
       log(err);
-      fn({ success: false, followings: [] });
+      fn && fn({ success: false, followings: [] });
     }
   };
 
   getLastOnline = (socket: Socket) => async ({ ids = [] }, fn: Function): Promise<void> => {
     try {
       const lastOnline = await this.userRepository.getLastOnline(ids);
-      fn({ success: true, lastOnline });
+      fn && fn({ success: true, lastOnline });
     } catch (err) {
       log(err);
-      fn({ success: false, lastOnline: [] });
+      fn && fn({ success: false, lastOnline: [] });
     }
   };
 
   search = (socket: Socket) => async ({query, page = 1}, fn: Function): Promise<void> => {
     try {
       const results = await this.usersProvider.getSearchResults(socket, query, page);
-      fn({ success: true, results });
+      fn && fn({ success: true, results });
     } catch (err) {
       log(err);
-      fn({ success: false, results: [] });
+      fn && fn({ success: false, results: [] });
     }
   };
 

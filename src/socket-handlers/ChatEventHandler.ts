@@ -76,6 +76,12 @@ export default class ChatEventHandler implements SocketHandlerInterface {
         fn && fn({ success: false });
       }
       try {
+        // get the conversation.
+        const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation) {
+          throw new Error("Invalid conversation.");
+        }
+
         const events = await this.eventRepository.find({
           where: { conversation: { id: conversationId } },
           take: 20,
@@ -85,7 +91,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
           relations: ['owner']
         });
         await this.userRepository.setLastOnline(socket.userId);
-        fn({ success: true, events: events.map(e => e.toResponse()) });
+        fn && fn({ success: true, events: events.map(e => e.toResponse()) });
       } catch (err) {
         log(err);
         fn && fn({ success: false, events: [] });
@@ -100,10 +106,10 @@ export default class ChatEventHandler implements SocketHandlerInterface {
         return;
       }
       const stats = await this.eventRepository.getUnreadStats(socket.userId);
-      fn({ success: true, stats });
+      fn && fn({ success: true, stats });
     } catch (err) {
       log(err);
-      //fn({ success: false, stats2: [] });
+      fn && fn({ success: false, stats2: [] });
     }
   };
   
@@ -114,6 +120,9 @@ export default class ChatEventHandler implements SocketHandlerInterface {
           fn && fn({ success: false });
         }
         const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation) {
+          throw new Error("Invalid conversation.");
+        }
         this.server.emitToConversation(conversation, "events:read_event", { conversationId, eventId, userId: socket.userId }, [socket.userId]);
         if (!eventId) {
           const success = await this.eventRepository.markConversationRead(conversationId, socket.userId);
@@ -127,7 +136,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
       }
     } catch (err) {
       log(err);
-      //fn({ success: false, stats: [] });
+      fn && fn({ success: false, stats: [] });
     }
   };
 

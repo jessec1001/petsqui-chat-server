@@ -42,13 +42,12 @@ export default class ConversationHandler {
       };
 
       const transformedConversations = await Promise.all(conversations.map(transformConversation));
-      //log(transformedConversations);
-      fn(
+      fn && fn(
         { success: true, conversations: transformedConversations }
       );
     } catch (err) {
-      //log(err);
-      fn({ success: false, conversations: [] });
+      log(err);
+      fn && fn({ success: false, conversations: [] });
     }
   };
 
@@ -70,14 +69,14 @@ export default class ConversationHandler {
           await entityManager.getCustomRepository(ConversationRepository).save(conversation);
           const conversationResponse = await conversation.toResponse(socket.userId);
           this.server.emitToConversation(conversation, "conversations:created", { conversation: conversationResponse }, [socket.userId]);
-          fn({ success: true, conversation: conversationResponse });
+          fn && fn({ success: true, conversation: conversationResponse });
         });    
       } else {
         throw new Error("Authentication failed!");
       }
     } catch (err) {
       log("ERROR", err);
-      fn({ success: false, error: err });
+      fn && fn({ success: false, error: err });
     }
   };
 
@@ -103,10 +102,10 @@ export default class ConversationHandler {
       } else {
         this.conversationRepository.save(conversation);
       }
-      return fn({ success: true });
+      return fn && fn({ success: true });
     } catch (error) {
       log(error);
-      return fn({ success: false, error });
+      return fn && fn({ success: false, error });
     }
   };
 
@@ -125,10 +124,10 @@ export default class ConversationHandler {
       conversation.avatar = avatar;
       this.conversationRepository.save(conversation);
       
-      return fn({ success: true });
+      return fn && fn({ success: true });
     } catch (error) {
       log(error);
-      return fn({ success: false, error });
+      return fn && fn({ success: false, error });
     }
   };
 

@@ -26,7 +26,7 @@ export default class UserHandler implements SocketHandlerInterface {
     try {
       const payload = await this.usersProvider.authenticate(options);
       if (!payload) {
-        fn({ success: false, error: "Authentication failed!" });
+        fn && fn({ success: false, error: "Authentication failed!" });
       } else {
         const userExists = await this.userRepository.findByID(payload.id);
         let overwriteKeys = false;
@@ -43,11 +43,11 @@ export default class UserHandler implements SocketHandlerInterface {
         socket.user = payload;
         socket.options = options;
         this.server.addClient(payload.id, socket);
-        fn({ success: true, user: savedUser.toResponse() });
+        fn && fn({ success: true, user: savedUser.toResponse() });
       }
     } catch (err) {
       log(err);
-      fn({ success: false, error: "Authentication failed!" });
+      fn && fn({ success: false, error: "Authentication failed!" });
     }
   };
 
