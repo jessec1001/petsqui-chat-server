@@ -1,6 +1,6 @@
 FROM node:current-alpine
 WORKDIR /server
-ARG version1
+ARG version2
 COPY src src
 COPY package.json package.json
 COPY public public

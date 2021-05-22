@@ -13,6 +13,9 @@ export default class Conversation {
   @PrimaryColumn("varchar", { length: 36 })
   id: string;
 
+  @Column({nullable: true})
+  is_public: boolean;
+
   @ManyToMany(() => User, user => user.conversations, { eager: false, cascade: true })
   @JoinTable()
   participants: Promise<User[]>;
@@ -91,7 +94,8 @@ export default class Conversation {
       publicAvatar: this.publicAvatar,
       lastEvent: this.lastEvent && this.lastEvent.toResponse(),
       participants: participants.map(p => p.toResponse()),
-      createdBy: this.createdBy
+      createdBy: this.createdBy,
+      is_public: this.is_public,
     };
   }
 }
@@ -108,4 +112,5 @@ export interface ConversationResponse {
   lastEvent: ChatEventResponse;
   participants: UserResponse[];
   createdBy: string;
+  is_public: boolean;
 }

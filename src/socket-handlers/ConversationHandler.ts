@@ -79,6 +79,117 @@ export default class ConversationHandler {
       fn && fn({ success: false, error: err });
     }
   };
+  setPublic = (socket: Socket) => async (
+    { conversationId, is_public }: {conversationId: string, is_public: boolean}, fn: Function
+  ): Promise<void> => {
+    try {
+      if (socket.userId) {
+        const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation || conversation.createdBy !== socket.userId) {
+          throw new Error("Conversation was not found!");
+        }
+        conversation.is_public = is_public;
+        getConnection().transaction(async entityManager => {
+          await entityManager.getCustomRepository(ConversationRepository).save(conversation);
+          const conversationResponse = await conversation.toResponse(socket.userId);
+          this.server.emitToConversation(conversation, "conversations:updated", { conversation: conversationResponse }, [socket.userId]);
+          fn && fn({ success: true, conversation: conversationResponse });
+        });    
+      } else {
+        throw new Error("Authentication failed!");
+      }
+    } catch (err) {
+      log("ERROR", err);
+      fn && fn({ success: false, error: err });
+    }
+  };
+
+  join = (socket: Socket) => async (
+    { conversationId }: {conversationId: string}, fn: Function
+  ): Promise<void> => {
+    try {
+      if (socket.userId) {
+        const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation || !conversation.is_public) {
+          throw new Error("Conversation was not found!");
+        }
+        conversation.addParticipants([User.createFromResponse(socket.user)]);
+        getConnection().transaction(async entityManager => {
+          await entityManager.getCustomRepository(ConversationRepository).save(conversation);
+          const conversationResponse = await conversation.toResponse(socket.userId);
+          this.server.emitToConversation(conversation, "conversations:updated", { conversation: conversationResponse }, [socket.userId]);
+          fn && fn({ success: true, conversation: conversationResponse });
+        });    
+      } else {
+        throw new Error("Authentication failed!");
+      }
+    } catch (err) {
+      log("ERROR", err);
+      fn && fn({ success: false, error: err });
+    }
+  };
+
+  invite = (socket: Socket) => async (
+    { participants, conversationId }: { participants: UserResponse[], conversationId: string}, fn: Function
+  ): Promise<void> => {
+    try {
+      if (socket.userId) {
+        const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation) {
+          throw new Error("Conversation was not found!");
+        }
+        const users = participants.map(p => User.createFromResponse(p));
+        await this.userRepository.bulkInsertOrUpdate(users);
+        await this.userRepository.setLastOnline(socket.userId);
+        conversation.addParticipants(users);
+        getConnection().transaction(async entityManager => {
+          await entityManager.getCustomRepository(ConversationRepository).save(conversation);
+          const conversationResponse = await conversation.toResponse(socket.userId);
+          this.server.emitToConversation(conversation, "conversations:updated", { conversation: conversationResponse }, [socket.userId]);
+          fn && fn({ success: true, conversation: conversationResponse });
+        });    
+      } else {
+        throw new Error("Authentication failed!");
+      }
+    } catch (err) {
+      log("ERROR", err);
+      fn && fn({ success: false, error: err });
+    }
+  };
+
+  block = (socket: Socket) => async (
+    { participantsIds, conversationId }: { participantsIds: string[], conversationId: string}, fn: Function
+  ): Promise<void> => {
+    try {
+      if (socket.userId) {
+        const conversation = await this.conversationRepository.findById(conversationId);
+        if (!conversation) {
+          throw new Error("Conversation was not found!");
+        }
+        const participants = await conversation.participants;
+        const isParticipant = participants.find(participant => participant.id == socket.userId);
+        if (!isParticipant) {
+          throw new Error("Invalid conversation.");
+        }
+        const owner = conversation.createdBy == socket.userId;
+        if (!owner) {
+          throw new Error("Invalid conversation.");
+        }
+
+        const newParticipants = participants.filter(participant => participantsIds.indexOf(participant.id) == -1);
+        conversation.participants = new Promise((resolve) => resolve(newParticipants));
+        this.conversationRepository.save(conversation);
+        const conversationResponse = await conversation.toResponse(socket.userId);
+        this.server.emitToConversation(conversation, "conversations:updated", { conversation: conversationResponse }, [socket.userId]);
+        fn && fn({ success: true, conversation: conversationResponse});
+      } else {
+        throw new Error("Authentication failed!");
+      }
+    } catch (err) {
+      log("ERROR", err);
+      fn && fn({ success: false, error: err });
+    }
+  };
 
   delete = (socket: Socket) => async (
     { conversationId, hidden }: { conversationId: string, hidden: boolean }, fn: Function
@@ -136,6 +247,10 @@ export default class ConversationHandler {
     socket.on("conversations:create", this.create(socket));
     socket.on("conversations:updateAvatar", this.updateAvatar(socket));
     socket.on("conversations:delete", this.delete(socket));
+    socket.on("conversations:invite", this.invite(socket));
+    socket.on("conversations:block", this.block(socket));
+    socket.on("conversations:join", this.join(socket));
+    socket.on("conversations:setPublic", this.setPublic(socket));
   }
 
   public static getInstance(): ConversationHandler {
