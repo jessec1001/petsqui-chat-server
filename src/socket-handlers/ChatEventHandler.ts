@@ -6,6 +6,9 @@ import { ConversationRepository, ChatEventRepository, UserRepository } from "../
 import SocketHandlerInterface from "./SocketHandlerInterface";
 import SocketIOServer, { Socket } from "../services/SocketIOServer";
 
+import usersProvider from "../services/UserProvider";
+import UsersProviderInterface from "../interfaces/UsersProviderInterface";
+
 const log = debug("application:event-handler");
 
 export default class ChatEventHandler implements SocketHandlerInterface {
@@ -13,17 +16,20 @@ export default class ChatEventHandler implements SocketHandlerInterface {
   eventRepository: ChatEventRepository;
   userRepository: UserRepository;
   server: SocketIOServer;
+  private usersProvider: UsersProviderInterface;
   private static instance: ChatEventHandler;
-
+  
   constructor(
     conversationRepository: ConversationRepository,
     eventRepository: ChatEventRepository,
     userRepository: UserRepository,
+    usersProvider: UsersProviderInterface,
     server: SocketIOServer
   ) {
     this.conversationRepository = conversationRepository;
     this.eventRepository = eventRepository;
     this.userRepository = userRepository;
+    this.usersProvider = usersProvider;
     this.server = server;
   }
 
@@ -55,7 +61,19 @@ export default class ChatEventHandler implements SocketHandlerInterface {
 
       const eventResponse = event.toResponse();
       eventResponse.conversationId = conversationId;
-
+      const participants = (await conversation.participants);
+      const skip = [socket.userId];
+      const recipients = participants.filter(p => skip.indexOf(p.id) < 0);
+      recipients.map(async (r) => {
+        const stats = await this.eventRepository.getUnreadStats(r.id);
+        let unread = 0;
+        stats.map(s=>{
+          unread += s.unreadCount;
+        });
+        this.usersProvider.pushMessage(socket, {
+          "badge": unread
+        });
+      });
       // send to all participants.
       this.server.emitToConversation(conversation, "events:event_created", { event: eventResponse });
 
@@ -153,6 +171,7 @@ export default class ChatEventHandler implements SocketHandlerInterface {
         getCustomRepository(ConversationRepository),
         getCustomRepository(ChatEventRepository),
         getCustomRepository(UserRepository),
+        usersProvider.getInstance(),
         SocketIOServer.getInstance()
       );
     }

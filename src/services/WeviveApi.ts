@@ -22,6 +22,10 @@ interface ApiResponseInterface {
   previous: string;
 }
 
+interface PushMesssageResponseInterface {
+  success: boolean;
+}
+
 interface FollowingsResponseInterface extends ApiResponseInterface {
   results: UserResponseInterface[];
 }
@@ -149,6 +153,25 @@ export default class WeviveApi implements UsersProviderInterface {
     } catch (err) {
       log(err);
       return [];
+    }
+  }
+
+  async pushMessage(socket: Socket, params: Record<string,any>): Promise<boolean> {
+    try {
+      const response = await this.client.get<PushMesssageResponseInterface>(
+        //`/api/v1/users/${socket.userId}/followings/`,
+        `/api/users/pushmessage/`,
+        {
+          ...this.getDefaultOptions(socket.options),
+          queryParameters: {
+            params,
+          },
+        },
+      );
+      return response.result && response.result.success;
+    } catch (err) {
+      log(err);
+      return false;
     }
   }
 
