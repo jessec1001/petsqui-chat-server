@@ -69,7 +69,7 @@ export default class ConversationHandler {
         const users = participants.map(p => User.createFromResponse(p));
         await this.userRepository.bulkInsertOrUpdate(users);
         await this.userRepository.setLastOnline(socket.userId);
-        conversation.addParticipants(users);
+        await conversation.addParticipants(users);
         getConnection().transaction(async entityManager => {
           await entityManager.getCustomRepository(ConversationRepository).save(conversation);
           const conversationResponse = await conversation.toResponse(socket.userId);
@@ -194,7 +194,7 @@ export default class ConversationHandler {
         const users = participants.map(p => User.createFromResponse(p));
         await this.userRepository.bulkInsertOrUpdate(users);
         await this.userRepository.setLastOnline(socket.userId);
-        conversation.addParticipants(users);
+        await conversation.addParticipants(users);
         getConnection().transaction(async entityManager => {
           await entityManager.getCustomRepository(ConversationRepository).save(conversation);
           const conversationResponse = await conversation.toResponse(socket.userId);

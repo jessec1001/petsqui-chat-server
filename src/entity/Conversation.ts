@@ -79,7 +79,7 @@ export default class Conversation {
 
   async toResponse(loggedInId: string): Promise<ConversationResponse|null> {
     const participants = await this.participants;
-    const current = participants.findIndex(p => p.id == loggedInId) == -1;
+    const current = participants.filter(p => p.id == loggedInId).pop();
     if (!current) {
       return null;
     }

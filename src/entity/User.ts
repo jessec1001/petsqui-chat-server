@@ -36,6 +36,12 @@ export default class User {
   status: string;
 
   @Column({ nullable: true })
+  about: string;
+
+  @Column({ nullable: true })
+  website: string;
+
+  @Column({ nullable: true })
   public_key: string;
 
   @Column({ nullable: true })
@@ -72,6 +78,8 @@ export default class User {
       public_key: this.public_key,
       lastOnline: this.lastOnline,
       status: this.status,
+      about: this.about,
+      website: this.website,
       salt: "SALT",
     };
   }
@@ -89,7 +97,12 @@ export default class User {
     if (userResponse.avatar) {
       this.avatar = userResponse.avatar;
     }
-
+    if (userResponse.website) {
+      this.website = userResponse.website;
+    }
+    if (userResponse.about) {
+      this.about = userResponse.about;
+    }
     if (userResponse.color) {
       this.color = userResponse.color;
     }
@@ -108,4 +121,6 @@ export interface UserResponse {
   salt ?: string;
   lastOnline ?: Date;
   status ?: string;
+  about ?: string;
+  website ?: string;
 }
