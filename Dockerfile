@@ -8,7 +8,7 @@ COPY tsconfig.json /server
 COPY yarn.lock /server
 COPY patches /server/patches
 RUN apk add --no-cache --virtual .gyp \
-        python \
+        python3 \
         make \
         g++ \
         && apk add yarn \
