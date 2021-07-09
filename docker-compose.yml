@@ -17,8 +17,10 @@ services:
     restart: always
   redis:
     image: "redis:alpine"
+    ports:
+      - '${REDIS_PORT}:${REDIS_PORT}'
     expose:
-      - 6379
+      - ${REDIS_PORT}
 
   web:
     build: .
@@ -32,7 +34,7 @@ services:
       - ./build:/server/build
     environment:
       REDIS_HOST: "redis"
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_PORT}
       TYPEORM_CONNECTION: "postgres"
       TYPEORM_HOST: postgres
       TYPEORM_USERNAME: "postgres"

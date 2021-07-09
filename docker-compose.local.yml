@@ -18,7 +18,7 @@ services:
   redis:
     image: "redis:alpine"
     expose:
-      - 6379
+      - ${REDIS_PORT}
 
   web:
     build: .
@@ -35,7 +35,7 @@ services:
       - ./build:/server/build
     environment:
       REDIS_HOST: "redis"
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_PORT}
       TYPEORM_CONNECTION: "mariadb"
       TYPEORM_HOST: mariadb
       TYPEORM_USERNAME: "test"
