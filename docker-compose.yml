@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:12.5-alpine
     environment:
+      - POSTGRES_USER=${TYPEORM_USERNAME}
       - POSTGRES_PASSWORD=${TYPEORM_PASSWORD}
       - POSTGRES_DB=${TYPEORM_DATABASE}
       - PGDATA=/var/lib/postgresql/data/pgdata
@@ -37,7 +38,7 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       TYPEORM_CONNECTION: "postgres"
       TYPEORM_HOST: postgres
-      TYPEORM_USERNAME: "postgres"
+      TYPEORM_USERNAME: ${TYPEORM_USERNAME}
       TYPEORM_PASSWORD: ${TYPEORM_PASSWORD}
       TYPEORM_DATABASE: ${TYPEORM_DATABASE}
       TYPEORM_PORT: ${TYPEORM_PORT}
