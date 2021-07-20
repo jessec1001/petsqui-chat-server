@@ -27,10 +27,10 @@ export default class SocketIOServer {
     });
 
     if (process.env.REDIS_HOST !== 'localhost') {
-      //const connectionString = "rediss://"+process.env.REDIS_USER+":"+process.env.REDIS_PASSWORD+"@"+process.env.REDIS_HOST+":"+process.env.REDIS_PORT;
-      //const pubClient = createClient(connectionString, { tls: { servername: new URL(connectionString).hostname } });
-      //const subClient = createClient(connectionString, { tls: { servername: new URL(connectionString).hostname } });
-      //this.io.adapter(createAdapter({ pubClient, subClient }));
+      const connectionString = "rediss://"+process.env.REDIS_USER+":"+process.env.REDIS_PASSWORD+"@"+process.env.REDIS_HOST+":"+process.env.REDIS_PORT;
+      const pubClient = createClient(connectionString, { tls: { servername: process.env.REDIS_HOST } });
+      const subClient = createClient(connectionString, { tls: { servername: process.env.REDIS_HOST } });
+      this.io.adapter(createAdapter({ pubClient, subClient }));
     } else {
       const pubClient = createClient({ host: process.env.REDIS_HOST, port: process.env.REDIS_PORT });
       const subClient = pubClient.duplicate();
