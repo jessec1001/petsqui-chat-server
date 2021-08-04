@@ -72,6 +72,19 @@
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ]
+        },
+        {
+          "type": "node",
+          "request": "launch",
+          "name": "Local Dev",
+          "protocol": "auto",
+          "runtimeExecutable": "yarn",
+          "runtimeArgs": ["run", "local-dev"],
+          "restart": true,
+          "port": 5858,
+          "console": "integratedTerminal",
+          "internalConsoleOptions": "neverOpen",
+          "outFiles": ["${workspaceFolder}/dist/**/*.js"]
         }
     ]
 }
