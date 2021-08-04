@@ -44,6 +44,7 @@
         "debug": "nodemon --legacy-watch --watch ./build --inspect=0.0.0.0:5858 --nolazy ./build/index.js",
         "local-watch": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts",
         "local-debug": "nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts --inspect=0.0.0.0:5858",
-        "docker-run": "tsc -p ./ && docker-compose up"
+        "docker-run": "tsc -p ./ && docker-compose up",
+        "local-dev": "docker-compose up -d && nodemon --watch \"./src/**/*.ts\" --ignore \"./src/**/*.spec.ts\" --exec ts-node src/index.ts"
     }
 }
